@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_sid_nonconformity" model="ir.actions.report">
+        <field name="name">Nonconformity Phase Report</field>
+        <field name="model">sid.nonconformity</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sid_nonconformity.report_sid_nonconformity_document</field>
+        <field name="report_file">sid_nonconformity.report_sid_nonconformity_document</field>
+        <field name="print_report_name">'NC-%s-%s' % (object.name, object.state)</field>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_sid_nonconformity_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Nonconformity Report - <span t-field="o.name"/></h2>
+                        <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                        <table class="table table-sm o_main_table">
+                            <tbody>
+                                <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
+                                <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                                <tr><td><strong>ISO Scope</strong></td><td><span t-field="o.iso_scope"/></td></tr>
+                                <tr><td><strong>Severity</strong></td><td><span t-field="o.severity"/></td></tr>
+                                <tr><td><strong>Priority</strong></td><td><span t-field="o.priority"/></td></tr>
+                                <tr><td><strong>Partner</strong></td><td><span t-field="o.partner_id"/></td></tr>
+                                <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                                <tr><td><strong>Detection date</strong></td><td><span t-field="o.date_detected"/></td></tr>
+                                <tr><td><strong>Deadline</strong></td><td><span t-field="o.date_deadline"/></td></tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Economic impact distribution</h4>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr><td><strong>Estimated cost</strong></td><td class="text-right"><span t-field="o.estimated_cost" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                                <tr><td><strong>Final amount - Customer</strong></td><td class="text-right"><span t-field="o.amount_customer" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                                <tr><td><strong>Final amount - SIDSA</strong></td><td class="text-right"><span t-field="o.amount_sidsa" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                                <tr><td><strong>Final amount - Supplier</strong></td><td class="text-right"><span t-field="o.amount_supplier" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Progress by phase</h4>
+                        <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
+                        <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
+                        <p><strong>Root Cause:</strong> <span t-field="o.root_cause"/></p>
+                        <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
+                        <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
+                        <p><strong>Effectiveness Check:</strong> <span t-field="o.effectiveness_check"/></p>
+                        <p><strong>Closing Notes:</strong> <span t-field="o.closing_notes"/></p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
