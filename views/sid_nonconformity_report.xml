@@ -32,16 +32,6 @@
                             </tbody>
                         </table>
 
-                        <h4>Economic impact distribution</h4>
-                        <table class="table table-sm">
-                            <tbody>
-                                <tr><td><strong>Estimated cost</strong></td><td class="text-right"><span t-field="o.estimated_cost" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
-                                <tr><td><strong>Final amount - Customer</strong></td><td class="text-right"><span t-field="o.amount_customer" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
-                                <tr><td><strong>Final amount - SIDSA</strong></td><td class="text-right"><span t-field="o.amount_sidsa" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
-                                <tr><td><strong>Final amount - Supplier</strong></td><td class="text-right"><span t-field="o.amount_supplier" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
-                            </tbody>
-                        </table>
-
                         <h4>Progress by phase</h4>
                         <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
                         <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>

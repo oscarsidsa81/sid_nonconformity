@@ -108,7 +108,7 @@ class SidNonconformity(models.Model):
     picking_id = fields.Many2one('stock.picking', string='Picking', tracking=True)
     move_line_id = fields.Many2one('stock.move.line', string='Operation Line', tracking=True)
 
-    description = fields.Text(string='Description / Evidence', tracking=True)
+    description = fields.Html(string='Description / Evidence', tracking=True, sanitize=True)
     containment_action = fields.Text(string='Immediate Containment Action', tracking=True)
     root_cause = fields.Text(string='Root Cause Analysis', tracking=True)
     corrective_action = fields.Text(string='Corrective Action', tracking=True)
