@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import base64
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -35,42 +37,42 @@ class SidNonconformity(models.Model):
     )
 
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('open', 'Open'),
-        ('action', 'Corrective Action'),
-        ('verify', 'Effectiveness Check'),
-        ('done', 'Closed'),
-        ('cancel', 'Cancelled'),
+        ('draft', 'Borrador'),
+        ('open', 'Abierta'),
+        ('action', 'Acción Correctiva'),
+        ('verify', 'Verificación de Eficacia'),
+        ('done', 'Cerrada'),
+        ('cancel', 'Cancelada'),
     ], string='Status', default='draft', required=True, tracking=True)
 
     iso_scope = fields.Selection([
         ('iso_9001', 'ISO 9001'),
         ('iso_14001', 'ISO 14001'),
-        ('integrated', 'ISO 9001 + ISO 14001'),
+        ('integrated', 'ISO 9001 + ISO 14001 Integrado'),
     ], string='ISO Scope', default='iso_9001', required=True, tracking=True)
 
     nc_type = fields.Selection([
-        ('supplier', 'Supplier / Purchase'),
-        ('customer', 'Customer Claim'),
-        ('warehouse', 'Warehouse / Logistics'),
-        ('product', 'Product / Specification'),
-        ('process', 'Internal Process'),
-        ('environment', 'Environmental Incident'),
-        ('audit', 'Audit Finding'),
-        ('other', 'Other'),
+        ('supplier', 'Proveedor / Compra'),
+        ('customer', 'Reclamo de Cliente'),
+        ('warehouse', 'Almacén / Logística'),
+        ('product', 'Producto / Especificación'),
+        ('process', 'Proceso Interno'),
+        ('environment', 'Incidente Ambiental'),
+        ('audit', 'Hallazgo de Auditoría'),
+        ('other', 'Otro'),
     ], string='Type', default='process', required=True, tracking=True)
 
     severity = fields.Selection([
-        ('minor', 'Minor'),
-        ('major', 'Major'),
-        ('critical', 'Critical'),
+        ('minor', 'Menor'),
+        ('major', 'Mayor'),
+        ('critical', 'Crítica'),
     ], string='Severity', default='minor', tracking=True)
 
     priority = fields.Selection([
-        ('low', 'Low'),
+        ('low', 'Baja'),
         ('normal', 'Normal'),
-        ('high', 'High'),
-        ('urgent', 'Urgent'),
+        ('high', 'Alta'),
+        ('urgent', 'Urgente'),
     ], string='Priority', default='normal', tracking=True)
 
     user_id = fields.Many2one(
@@ -158,8 +160,48 @@ class SidNonconformity(models.Model):
                 ('res_id', '=', rec.id),
             ])
 
+
+    def _post_phase_report_to_chatter(self):
+        report_action = self.env.ref('sid_nonconformity.action_report_sid_nonconformity', raise_if_not_found=False)
+        if not report_action:
+            return
+        for rec in self:
+            pdf_content, _ = report_action._render_qweb_pdf(rec.id)
+            attachment = self.env['ir.attachment'].create({
+                'name': 'NC-%s-%s.pdf' % (rec.name, rec.state),
+                'type': 'binary',
+                'datas': base64.b64encode(pdf_content),
+                'mimetype': 'application/pdf',
+                'res_model': rec._name,
+                'res_id': rec.id,
+            })
+            rec.message_post(
+                body=_('Reporte de fase generado automáticamente al pasar de Borrador a Abierta.'),
+                attachment_ids=[attachment.id],
+            )
+
+    def action_previous_phase(self):
+        previous_state_map = {
+            'open': 'draft',
+            'action': 'open',
+            'verify': 'action',
+            'done': 'verify',
+        }
+        for rec in self:
+            previous_state = previous_state_map.get(rec.state)
+            if not previous_state:
+                raise UserError(_('No previous phase available from the current state.'))
+            vals = {'state': previous_state}
+            if previous_state != 'done':
+                vals['date_closed'] = False
+            rec.write(vals)
+
     def action_open(self):
-        self.write({'state': 'open'})
+        for rec in self:
+            old_state = rec.state
+            rec.write({'state': 'open'})
+            if old_state == 'draft':
+                rec._post_phase_report_to_chatter()
 
     def action_start_action(self):
         self.write({'state': 'action'})

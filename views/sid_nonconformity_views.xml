@@ -62,9 +62,9 @@
                 <field name="title"/>
                 <field name="partner_id" domain="[('is_company', '=', True)]"/>
                 <field name="product_id"/>
-                <field name="purchase_id"/>
-                <field name="sale_id"/>
-                <field name="picking_id"/>
+                <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
+                <field name="sale_id" domain="[('partner_id', '=', partner_id)]"/>
+                <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
                 <filter name="open" string="Open" domain="[('state', 'not in', ('done', 'cancel'))]"/>
                 <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
                 <filter name="my_nc" string="My NCs" domain="[('user_id', '=', uid)]"/>
@@ -93,6 +93,7 @@
                     <button name="action_verify" type="object" string="Verify Effectiveness" states="action" class="oe_highlight"/>
                     <button name="action_close" type="object" string="Close" states="action,verify" class="oe_highlight"/>
                     <button name="action_cancel" type="object" string="Cancel" states="draft,open,action,verify"/>
+                    <button name="action_previous_phase" type="object" string="Previous Phase" states="open,action,verify,done"/>
                     <button name="%(action_report_sid_nonconformity)d" type="action" string="Print Phase PDF" class="btn-secondary"/>
                     <button name="action_reset_to_draft" type="object" string="Reset to Draft" states="cancel"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,action,verify,done"/>
@@ -130,14 +131,14 @@
                             <group>
                                 <group string="Operational Links">
                                     <field name="partner_id" domain="[('is_company', '=', True)]"/>
-                                    <field name="purchase_id"/>
-                                    <field name="sale_id"/>
-                                    <field name="picking_id"/>
-                                    <field name="move_line_id"/>
+                                    <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
+                                    <field name="sale_id" domain="[('partner_id', '=', partner_id)]"/>
+                                    <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
+                                    <field name="move_line_id" domain="[('picking_id', '=', picking_id)]"/>
                                 </group>
                                 <group string="Product / Impact">
                                     <field name="product_id"/>
-                                    <field name="lot_id"/>
+                                    <field name="lot_id" domain="[('product_id', '=', product_id)]"/>
                                     <field name="quantity_affected"/>
                                     <field name="uom_id"/>
                                     <field name="estimated_cost"/>
