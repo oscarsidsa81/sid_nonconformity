@@ -16,6 +16,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence.xml',
+        'views/sid_nonconformity_report.xml',
         'views/sid_nonconformity_views.xml',
         'views/purchase_order_views.xml',
         'views/sale_order_views.xml',
