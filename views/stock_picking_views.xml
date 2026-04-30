@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_picking_form_sid_nonconformity" model="ir.ui.view">
+        <field name="name">stock.picking.form.sid.nonconformity</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_sid_nonconformities" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                    <field name="sid_nonconformity_count" widget="statinfo" string="NCs"/>
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_create_sid_nonconformity" type="object" string="Create NC" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

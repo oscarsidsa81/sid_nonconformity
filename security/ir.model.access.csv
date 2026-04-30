@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sid_nonconformity_user,sid.nonconformity.user,model_sid_nonconformity,sid_nonconformity.group_sid_nonconformity_user,1,1,1,0
+access_sid_nonconformity_manager,sid.nonconformity.manager,model_sid_nonconformity,sid_nonconformity.group_sid_nonconformity_manager,1,1,1,1
