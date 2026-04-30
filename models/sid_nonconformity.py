@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class SidNonconformity(models.Model):
@@ -93,19 +93,22 @@ class SidNonconformity(models.Model):
     days_open = fields.Integer(string='Days Open', compute='_compute_dates')
     days_to_close = fields.Integer(string='Days to Close', compute='_compute_dates', store=True)
 
-    partner_id = fields.Many2one('res.partner', string='Customer / Supplier', tracking=True)
+    partner_id = fields.Many2one('res.partner', string='Customer / Supplier', tracking=True, domain="[('is_company', '=', True)]")
     product_id = fields.Many2one('product.product', string='Product', tracking=True)
     lot_id = fields.Many2one('stock.production.lot', string='Lot / Serial Number', tracking=True)
     quantity_affected = fields.Float(string='Affected Quantity', tracking=True)
     uom_id = fields.Many2one('uom.uom', string='UoM')
     estimated_cost = fields.Monetary(string='Estimated Cost', currency_field='currency_id', tracking=True)
+    amount_customer = fields.Monetary(string='Final Amount - Customer', currency_field='currency_id', tracking=True)
+    amount_sidsa = fields.Monetary(string='Final Amount - SIDSA', currency_field='currency_id', tracking=True)
+    amount_supplier = fields.Monetary(string='Final Amount - Supplier', currency_field='currency_id', tracking=True)
 
     purchase_id = fields.Many2one('purchase.order', string='Purchase Order', tracking=True)
     sale_id = fields.Many2one('sale.order', string='Sales Order', tracking=True)
     picking_id = fields.Many2one('stock.picking', string='Picking', tracking=True)
     move_line_id = fields.Many2one('stock.move.line', string='Operation Line', tracking=True)
 
-    description = fields.Text(string='Description / Evidence', tracking=True)
+    description = fields.Html(string='Description / Evidence', tracking=True, sanitize=True)
     containment_action = fields.Text(string='Immediate Containment Action', tracking=True)
     root_cause = fields.Text(string='Root Cause Analysis', tracking=True)
     corrective_action = fields.Text(string='Corrective Action', tracking=True)
@@ -130,6 +133,12 @@ class SidNonconformity(models.Model):
         for rec in self:
             if rec.product_id and not rec.uom_id:
                 rec.uom_id = rec.product_id.uom_id
+
+    @api.constrains('amount_customer', 'amount_sidsa', 'amount_supplier')
+    def _check_final_amount_distribution(self):
+        for rec in self:
+            if not any([rec.amount_customer, rec.amount_sidsa, rec.amount_supplier]):
+                raise ValidationError(_('You must define at least one final amount (Customer, SIDSA, or Supplier).'))
 
     @api.depends('date_detected', 'date_deadline', 'date_closed', 'state')
     def _compute_dates(self):
