@@ -166,9 +166,10 @@ class SidNonconformity(models.Model):
             if rec.purchase_id:
                 sale_orders = rec.purchase_id.order_line.mapped('sale_line_id.order_id')
             if rec.partner_id:
-                supplier_sales = self.env['sale.order'].search([
-                    ('order_line.purchase_line_id.order_id.partner_id', '=', rec.partner_id.id)
+                supplier_purchases = self.env['purchase.order'].search([
+                    ('partner_id', '=', rec.partner_id.id)
                 ])
+                supplier_sales = supplier_purchases.order_line.mapped('sale_line_id.order_id')
                 sale_orders |= supplier_sales
             rec.available_sale_order_ids = sale_orders
 
