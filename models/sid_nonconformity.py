@@ -161,7 +161,7 @@ class SidNonconformity(models.Model):
             ])
 
 
-    def _post_phase_report_to_chatter(self):
+    def _post_phase_report_to_chatter(self, message=None):
         report_action = self.env.ref('sid_nonconformity.action_report_sid_nonconformity', raise_if_not_found=False)
         if not report_action:
             return
@@ -176,7 +176,7 @@ class SidNonconformity(models.Model):
                 'res_id': rec.id,
             })
             rec.message_post(
-                body=_('Reporte de fase generado automáticamente al pasar de Borrador a Abierta.'),
+                body=message or _('Reporte de fase generado automáticamente.'),
                 attachment_ids=[attachment.id],
             )
 
@@ -201,7 +201,9 @@ class SidNonconformity(models.Model):
             old_state = rec.state
             rec.write({'state': 'open'})
             if old_state == 'draft':
-                rec._post_phase_report_to_chatter()
+                rec._post_phase_report_to_chatter(
+                    message=_('Reporte de fase generado automáticamente al pasar de Borrador a Abierta.')
+                )
 
     def action_start_action(self):
         self.write({'state': 'action'})
@@ -221,6 +223,9 @@ class SidNonconformity(models.Model):
             if missing:
                 raise UserError(_('You cannot close the nonconformity until these fields are completed: %s') % ', '.join(missing))
             rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
+            rec._post_phase_report_to_chatter(
+                message=_('Formulario PDF generado automáticamente al cerrar la no conformidad.')
+            )
 
     def action_cancel(self):
         self.write({'state': 'cancel'})
