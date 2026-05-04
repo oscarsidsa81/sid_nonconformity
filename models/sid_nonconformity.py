@@ -53,20 +53,20 @@ class SidNonconformity(models.Model):
 
     nc_type = fields.Selection([
         ('supplier', 'Proveedor / Compra'),
-        ('customer', 'Reclamo de Cliente'),
+        ('customer', 'Reclamación de Cliente'),
         ('warehouse', 'Almacén / Logística'),
         ('product', 'Producto / Especificación'),
         ('process', 'Proceso Interno'),
         ('environment', 'Incidente Ambiental'),
-        ('audit', 'Hallazgo de Auditoría'),
+        ('audit', 'Incidencia de Auditoría'),
         ('other', 'Otro'),
     ], string='Type', default='process', required=True, tracking=True)
 
     severity = fields.Selection([
-        ('minor', 'Menor'),
-        ('major', 'Mayor'),
+        ('minor', 'Baja'),
+        ('major', 'Alta'),
         ('critical', 'Crítica'),
-    ], string='Severity', default='minor', tracking=True)
+    ], string='Importancia', default='minor', tracking=True)
 
     priority = fields.Selection([
         ('low', 'Baja'),
@@ -111,11 +111,11 @@ class SidNonconformity(models.Model):
     move_line_id = fields.Many2one('stock.move.line', string='Operation Line', tracking=True)
 
     description = fields.Html(string='Description / Evidence', tracking=True, sanitize=True)
-    containment_action = fields.Text(string='Immediate Containment Action', tracking=True)
-    root_cause = fields.Text(string='Root Cause Analysis', tracking=True)
-    corrective_action = fields.Text(string='Corrective Action', tracking=True)
-    preventive_action = fields.Text(string='Preventive Action / Risk Treatment', tracking=True)
-    effectiveness_check = fields.Text(string='Effectiveness Check', tracking=True)
+    containment_action = fields.Html(string='Acciones Inmediatas', tracking=True)
+    root_cause = fields.Html(string='Causa Raíz', tracking=True)
+    corrective_action = fields.Html(string='Acciones Correctivas', tracking=True)
+    preventive_action = fields.Html(string='Preventive Action / Risk Treatment', tracking=True)
+    effectiveness_check = fields.Html(string='Validación', tracking=True)
     closing_notes = fields.Text(string='Closing Notes', tracking=True)
     environmental_impact = fields.Text(string='Environmental Impact / Controls', tracking=True)
 
