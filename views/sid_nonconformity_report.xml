@@ -16,6 +16,39 @@
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.external_layout">
                     <div class="page">
+                        <style>
+                            .nc-ribbon-wrap {
+                                position: relative;
+                                min-height: 42px;
+                            }
+
+                            .nc-state-ribbon {
+                                position: absolute;
+                                top: 0;
+                                right: 0;
+                                padding: 4px 14px;
+                                color: #ffffff;
+                                font-weight: 700;
+                                border-radius: 0 0 0 8px;
+                                text-transform: uppercase;
+                                font-size: 11px;
+                                letter-spacing: 0.4px;
+                            }
+
+                            .nc-state-ribbon.draft { background-color: #6c757d; }
+                            .nc-state-ribbon.open { background-color: #0d6efd; }
+                            .nc-state-ribbon.action { background-color: #fd7e14; }
+                            .nc-state-ribbon.verify { background-color: #6f42c1; }
+                            .nc-state-ribbon.done { background-color: #198754; }
+                            .nc-state-ribbon.cancel { background-color: #dc3545; }
+                        </style>
+
+                        <div class="nc-ribbon-wrap">
+                            <div t-attf-class="nc-state-ribbon {{ o.state }}">
+                                <span t-field="o.state"/>
+                            </div>
+                        </div>
+
                         <h2>Nonconformity Report - <span t-field="o.name"/></h2>
                         <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
                         <table class="table table-sm o_main_table">
