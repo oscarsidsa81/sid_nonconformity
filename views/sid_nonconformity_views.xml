@@ -63,7 +63,7 @@
                 <field name="partner_id" domain="[('is_company', '=', True)]"/>
                 <field name="product_id"/>
                 <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
-                <field name="sale_id" domain="[('partner_id', '=', partner_id)]"/>
+                <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
                 <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
                 <filter name="open" string="Open" domain="[('state', 'not in', ('done', 'cancel'))]"/>
                 <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
@@ -132,7 +132,7 @@
                                 <group string="Operational Links">
                                     <field name="partner_id" domain="[('is_company', '=', True)]"/>
                                     <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
-                                    <field name="sale_id" domain="[('partner_id', '=', partner_id)]"/>
+                                    <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
                                     <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
                                     <field name="move_line_id" domain="[('picking_id', '=', picking_id)]"/>
                                 </group>
@@ -142,9 +142,12 @@
                                     <field name="quantity_affected"/>
                                     <field name="uom_id"/>
                                     <field name="estimated_cost"/>
-                                    <field name="amount_customer"/>
-                                    <field name="amount_sidsa"/>
-                                    <field name="amount_supplier"/>
+                                    <field name="amount_customer" attrs="{'invisible': [('assume_cost_customer', '=', False)], 'required': [('assume_cost_customer', '=', True)]}"/>
+                                    <field name="amount_sidsa" attrs="{'invisible': [('assume_cost_sidsa', '=', False)], 'required': [('assume_cost_sidsa', '=', True)]}"/>
+                                    <field name="amount_supplier" attrs="{'invisible': [('assume_cost_supplier', '=', False)], 'required': [('assume_cost_supplier', '=', True)]}"/>
+                                    <field name="assume_cost_customer"/>
+                                    <field name="assume_cost_sidsa"/>
+                                    <field name="assume_cost_supplier"/>
                                 </group>
                             </group>
                             <group string="Description / Evidence">

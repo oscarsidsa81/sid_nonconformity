@@ -105,6 +105,17 @@ class SidNonconformity(models.Model):
     amount_sidsa = fields.Monetary(string='Final Amount - SIDSA', currency_field='currency_id', tracking=True)
     amount_supplier = fields.Monetary(string='Final Amount - Supplier', currency_field='currency_id', tracking=True)
 
+
+    assume_cost_customer = fields.Boolean(string='Cost Assumed by Customer', tracking=True)
+    assume_cost_sidsa = fields.Boolean(string='Cost Assumed by SIDSA', tracking=True)
+    assume_cost_supplier = fields.Boolean(string='Cost Assumed by Supplier', tracking=True)
+
+    available_sale_order_ids = fields.Many2many(
+        'sale.order',
+        compute='_compute_available_sale_order_ids',
+        string='Available Sales Orders',
+    )
+
     purchase_id = fields.Many2one('purchase.order', string='Purchase Order', tracking=True)
     sale_id = fields.Many2one('sale.order', string='Sales Order', tracking=True)
     picking_id = fields.Many2one('stock.picking', string='Picking', tracking=True)
@@ -136,11 +147,30 @@ class SidNonconformity(models.Model):
             if rec.product_id and not rec.uom_id:
                 rec.uom_id = rec.product_id.uom_id
 
-    @api.constrains('amount_customer', 'amount_sidsa', 'amount_supplier')
-    def _check_final_amount_distribution(self):
+
+
+    @api.constrains('assume_cost_customer', 'assume_cost_sidsa', 'assume_cost_supplier', 'amount_customer', 'amount_sidsa', 'amount_supplier')
+    def _check_assumed_cost_amounts(self):
         for rec in self:
-            if not any([rec.amount_customer, rec.amount_sidsa, rec.amount_supplier]):
-                raise ValidationError(_('You must define at least one final amount (Customer, SIDSA, or Supplier).'))
+            if rec.assume_cost_customer and not rec.amount_customer:
+                raise ValidationError(_('Customer amount is required when customer assumes the cost.'))
+            if rec.assume_cost_sidsa and not rec.amount_sidsa:
+                raise ValidationError(_('SIDSA amount is required when SIDSA assumes the cost.'))
+            if rec.assume_cost_supplier and not rec.amount_supplier:
+                raise ValidationError(_('Supplier amount is required when supplier assumes the cost.'))
+
+    @api.depends('purchase_id', 'partner_id')
+    def _compute_available_sale_order_ids(self):
+        for rec in self:
+            sale_orders = self.env['sale.order']
+            if rec.purchase_id:
+                sale_orders = rec.purchase_id.order_line.mapped('sale_line_id.order_id')
+            if rec.partner_id:
+                supplier_sales = self.env['sale.order'].search([
+                    ('order_line.purchase_line_id.order_id.partner_id', '=', rec.partner_id.id)
+                ])
+                sale_orders |= supplier_sales
+            rec.available_sale_order_ids = sale_orders
 
     @api.depends('date_detected', 'date_deadline', 'date_closed', 'state')
     def _compute_dates(self):
@@ -220,6 +250,8 @@ class SidNonconformity(models.Model):
                 missing.append(_('Corrective Action'))
             if rec.state == 'verify' and not rec.effectiveness_check:
                 missing.append(_('Effectiveness Check'))
+            if not any([rec.assume_cost_customer, rec.assume_cost_sidsa, rec.assume_cost_supplier]):
+                missing.append(_('At least one cost responsibility (Customer, SIDSA, Supplier)'))
             if missing:
                 raise UserError(_('You cannot close the nonconformity until these fields are completed: %s') % ', '.join(missing))
             rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
