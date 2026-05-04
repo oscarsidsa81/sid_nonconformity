@@ -166,7 +166,7 @@ class SidNonconformity(models.Model):
         if not report_action:
             return
         for rec in self:
-            pdf_content, _ = report_action._render_qweb_pdf(rec.id)
+            pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
             attachment = self.env['ir.attachment'].create({
                 'name': 'NC-%s-%s.pdf' % (rec.name, rec.state),
                 'type': 'binary',
