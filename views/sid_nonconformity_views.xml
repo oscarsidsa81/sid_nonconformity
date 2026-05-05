@@ -42,7 +42,7 @@
                             <strong><field name="name"/> - <field name="title"/></strong>
                             <div><field name="nc_type"/> / <field name="severity"/></div>
                             <div t-if="record.partner_id.raw_value"><field name="partner_id" domain="[('is_company', '=', True)]"/></div>
-                            <div t-if="record.date_deadline.raw_value">Deadline: <field name="date_deadline"/></div>
+                            <div t-if="record.date_deadline.raw_value">Fecha límite: <field name="date_deadline"/></div>
                             <div class="oe_kanban_footer">
                                 <field name="user_id" widget="many2one_avatar_user"/>
                             </div>
@@ -66,18 +66,18 @@
                 <field name="available_sale_order_ids" invisible="1"/>
                 <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
                 <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
-                <filter name="open" string="Open" domain="[('state', 'not in', ('done', 'cancel'))]"/>
-                <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
-                <filter name="my_nc" string="My NCs" domain="[('user_id', '=', uid)]"/>
+                <filter name="open" string="Abierta(s)" domain="[('state', 'not in', ('done', 'cancel'))]"/>
+                <filter name="overdue" string="Vencidas" domain="[('is_overdue', '=', True)]"/>
+                <filter name="my_nc" string="Mis NC" domain="[('user_id', '=', uid)]"/>
                 <separator/>
                 <filter name="iso9001" string="ISO 9001" domain="[('iso_scope', 'in', ('iso_9001', 'integrated'))]"/>
                 <filter name="iso14001" string="ISO 14001" domain="[('iso_scope', 'in', ('iso_14001', 'integrated'))]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="group_type" string="Type" context="{'group_by': 'nc_type'}"/>
-                    <filter name="group_partner" string="Customer / Supplier" context="{'group_by': 'partner_id'}"/>
-                    <filter name="group_responsible" string="Responsible" context="{'group_by': 'user_id'}"/>
-                    <filter name="group_month" string="Detection Month" context="{'group_by': 'date_detected:month'}"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Tipo" context="{'group_by': 'nc_type'}"/>
+                    <filter name="group_partner" string="Cliente / Proveedor" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_responsible" string="Responsable" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_month" string="Mes de detección" context="{'group_by': 'date_detected:month'}"/>
                 </group>
             </search>
         </field>
@@ -87,30 +87,30 @@
         <field name="name">sid.nonconformity.form</field>
         <field name="model">sid.nonconformity</field>
         <field name="arch" type="xml">
-            <form string="Nonconformity">
+            <form string="No conformidad">
                 <header>
-                    <button name="action_open" type="object" string="Open" states="draft" class="oe_highlight"/>
-                    <button name="action_start_action" type="object" string="Start Corrective Action" states="open" class="oe_highlight"/>
-                    <button name="action_verify" type="object" string="Verify Effectiveness" states="action" class="oe_highlight"/>
-                    <button name="action_close" type="object" string="Close" states="action,verify" class="oe_highlight"/>
-                    <button name="action_cancel" type="object" string="Cancel" states="draft,open,action,verify"/>
-                    <button name="action_previous_phase" type="object" string="Previous Phase" states="open,action,verify,done"/>
-                    <button name="%(action_report_sid_nonconformity)d" type="action" string="Print Phase PDF" class="btn-secondary"/>
-                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" states="cancel"/>
+                    <button name="action_open" type="object" string="Abrir" states="draft" class="oe_highlight"/>
+                    <button name="action_start_action" type="object" string="Iniciar acción correctiva" states="open" class="oe_highlight"/>
+                    <button name="action_verify" type="object" string="Verificar eficacia" states="action" class="oe_highlight"/>
+                    <button name="action_close" type="object" string="Cerrar" states="action,verify" class="oe_highlight"/>
+                    <button name="action_cancel" type="object" string="Cancelar" states="draft,open,action,verify"/>
+                    <button name="action_previous_phase" type="object" string="Fase anterior" states="open,action,verify,done"/>
+                    <button name="%(action_report_sid_nonconformity)d" type="action" string="Imprimir PDF de fase" class="btn-secondary"/>
+                    <button name="action_reset_to_draft" type="object" string="Reiniciar a borrador" states="cancel"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,action,verify,done"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_attachments" type="object" class="oe_stat_button" icon="fa-paperclip">
-                            <field name="attachment_count" widget="statinfo" string="Attachments"/>
+                            <field name="attachment_count" widget="statinfo" string="Adjuntos"/>
                         </button>
                     </div>
                     <div class="oe_title">
                         <h1><field name="name" readonly="1"/></h1>
-                        <h2><field name="title" placeholder="Short description of the nonconformity"/></h2>
+                        <h2><field name="title" placeholder="Descripción breve de la no conformidad"/></h2>
                     </div>
                     <group>
-                        <group string="Classification">
+                        <group string="Clasificación">
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="iso_scope"/>
                             <field name="nc_type"/>
@@ -118,9 +118,9 @@
                             <field name="priority"/>
                             <field name="is_overdue" readonly="1"/>
                         </group>
-                        <group string="Responsibility and Dates">
+                        <group string="Responsabilidades y fechas">
                             <field name="user_id" widget="many2one_avatar_user"/>
-                            <field name="reviewer_id" widget="many2one_avatar_user"/>
+                            <field name="reviewer_id" widget="many2one_avatar_user" readonly="0"/>
                             <field name="date_detected"/>
                             <field name="date_deadline"/>
                             <field name="date_closed" readonly="1"/>
@@ -128,9 +128,9 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Origin">
+                        <page string="Origen">
                             <group>
-                                <group string="Operational Links">
+                                <group string="Enlaces operativos">
                                     <field name="partner_id" domain="[('is_company', '=', True)]"/>
                                     <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
                                     <field name="available_sale_order_ids" invisible="1"/>
@@ -138,7 +138,7 @@
                                     <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
                                     <field name="move_line_id" domain="[('picking_id', '=', picking_id)]"/>
                                 </group>
-                                <group string="Product / Impact">
+                                <group string="Producto / Impacto">
                                     <field name="product_id"/>
                                     <field name="lot_id" domain="[('product_id', '=', product_id)]"/>
                                     <field name="quantity_affected"/>
@@ -152,35 +152,35 @@
                                     <field name="assume_cost_supplier"/>
                                 </group>
                             </group>
-                            <group string="Description / Evidence">
-                                <field name="description" nolabel="1" placeholder="What happened? Where was it detected? What evidence exists?"/>
+                            <group string="Descripción / Evidencia">
+                                <field name="description" nolabel="1" placeholder="¿Qué ocurrió? ¿Dónde se detectó? ¿Qué evidencia existe?"/>
                             </group>
                         </page>
-                        <page string="Treatment">
-                            <group string="Immediate Containment">
-                                <field name="containment_action" nolabel="1" placeholder="Action taken to contain the issue and avoid recurrence during investigation."/>
+                        <page string="Tratamiento">
+                            <group string="Contención inmediata">
+                                <field name="containment_action" nolabel="1" placeholder="Acción tomada para contener el problema y evitar recurrencia durante la investigación."/>
                             </group>
-                            <group string="Root Cause">
-                                <field name="root_cause" nolabel="1" placeholder="Root cause analysis. Example: 5 Whys, process failure, supplier issue, documentation mismatch."/>
+                            <group string="Causa raíz">
+                                <field name="root_cause" nolabel="1" placeholder="Análisis de causa raíz. Ejemplo: 5 porqués, fallo de proceso, incidencia de proveedor o desajuste documental."/>
                             </group>
-                            <group string="Corrective Action">
+                            <group string="Acción correctiva">
                                 <field name="corrective_action" nolabel="1"/>
                             </group>
-                            <group string="Preventive Action / Risk Treatment">
+                            <group string="Acción preventiva / Tratamiento del riesgo">
                                 <field name="preventive_action" nolabel="1"/>
                             </group>
                         </page>
-                        <page string="Verification and Close">
-                            <group string="Effectiveness Check">
-                                <field name="effectiveness_check" nolabel="1" placeholder="How has the action been checked? Date, evidence and result."/>
+                        <page string="Verificación y cierre">
+                            <group string="Verificación de eficacia">
+                                <field name="effectiveness_check" nolabel="1" placeholder="¿Cómo se verificó la acción? Fecha, evidencia y resultado."/>
                             </group>
-                            <group string="Closing Notes">
+                            <group string="Notas de cierre">
                                 <field name="closing_notes" nolabel="1"/>
                             </group>
                         </page>
-                        <page string="Environmental">
-                            <group string="ISO 14001 Impact / Controls">
-                                <field name="environmental_impact" nolabel="1" placeholder="Environmental aspect, impact, waste, spill, packaging, transport or legal compliance issue."/>
+                        <page string="Ambiental">
+                            <group string="Impacto ISO 14001 / Controles">
+                                <field name="environmental_impact" nolabel="1" placeholder="Aspecto ambiental, impacto, residuo, derrame, embalaje, transporte o incumplimiento legal."/>
                             </group>
                         </page>
                     </notebook>
@@ -198,7 +198,7 @@
         <field name="name">sid.nonconformity.graph</field>
         <field name="model">sid.nonconformity</field>
         <field name="arch" type="xml">
-            <graph string="Nonconformities" type="bar">
+            <graph string="No conformidades" type="bar">
                 <field name="date_detected" interval="month"/>
                 <field name="id" type="measure"/>
                 <field name="nc_type"/>
@@ -210,7 +210,7 @@
         <field name="name">sid.nonconformity.pivot</field>
         <field name="model">sid.nonconformity</field>
         <field name="arch" type="xml">
-            <pivot string="Nonconformities">
+            <pivot string="No conformidades">
                 <field name="date_detected" interval="month" type="row"/>
                 <field name="nc_type" type="col"/>
                 <field name="id" type="measure"/>
@@ -219,13 +219,13 @@
     </record>
 
     <record id="action_sid_nonconformity" model="ir.actions.act_window">
-        <field name="name">Nonconformities</field>
+        <field name="name">No conformidades</field>
         <field name="res_model">sid.nonconformity</field>
         <field name="view_mode">tree,kanban,form,graph,pivot</field>
         <field name="context">{'search_default_open': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Create the first nonconformity</p>
-            <p>Track supplier, customer, logistics, product, process and environmental nonconformities with ISO 9001/14001 evidence.</p>
+            <p class="o_view_nocontent_smiling_face">Crear la primera no conformidad</p>
+            <p>Seguimiento de no conformidades de proveedor, cliente, logística, producto, proceso y ambientales con evidencias ISO 9001/14001.</p>
         </field>
     </record>
 </odoo>
