@@ -7,30 +7,30 @@ from odoo.exceptions import UserError, ValidationError
 
 class SidNonconformity(models.Model):
     _name = 'sid.nonconformity'
-    _description = 'SID Nonconformity'
+    _description = 'No conformidad SID'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date_detected desc, id desc'
 
     name = fields.Char(
-        string='Reference',
+        string='Referencia',
         required=True,
         copy=False,
         readonly=True,
         default=lambda self: _('New'),
         tracking=True,
     )
-    title = fields.Char(string='Title', required=True, tracking=True)
+    title = fields.Char(string='Título', required=True, tracking=True)
     active = fields.Boolean(default=True)
     company_id = fields.Many2one(
         'res.company',
-        string='Company',
+        string='Compañía',
         default=lambda self: self.env.company,
         required=True,
         tracking=True,
     )
     currency_id = fields.Many2one(
         'res.currency',
-        string='Currency',
+        string='Moneda',
         related='company_id.currency_id',
         readonly=True,
         store=True,
@@ -43,13 +43,13 @@ class SidNonconformity(models.Model):
         ('verify', 'Verificación de Eficacia'),
         ('done', 'Cerrada'),
         ('cancel', 'Cancelada'),
-    ], string='Status', default='draft', required=True, tracking=True)
+    ], string='Estado', default='draft', required=True, tracking=True)
 
     iso_scope = fields.Selection([
         ('iso_9001', 'ISO 9001'),
         ('iso_14001', 'ISO 14001'),
         ('integrated', 'ISO 9001 + ISO 14001 Integrado'),
-    ], string='ISO Scope', default='iso_9001', required=True, tracking=True)
+    ], string='Alcance ISO', default='iso_9001', required=True, tracking=True)
 
     nc_type = fields.Selection([
         ('supplier', 'Proveedor / Compra'),
@@ -60,7 +60,7 @@ class SidNonconformity(models.Model):
         ('environment', 'Incidente Ambiental'),
         ('audit', 'Incidencia de Auditoría'),
         ('other', 'Otro'),
-    ], string='Type', default='process', required=True, tracking=True)
+    ], string='Tipo', default='process', required=True, tracking=True)
 
     severity = fields.Selection([
         ('minor', 'Baja'),
@@ -73,64 +73,65 @@ class SidNonconformity(models.Model):
         ('normal', 'Normal'),
         ('high', 'Alta'),
         ('urgent', 'Urgente'),
-    ], string='Priority', default='normal', tracking=True)
+    ], string='Prioridad', default='normal', tracking=True)
 
     user_id = fields.Many2one(
         'res.users',
-        string='Responsible',
+        string='Responsable',
         default=lambda self: self.env.user,
         tracking=True,
     )
-    reviewer_id = fields.Many2one('res.users', string='Reviewer', tracking=True)
+    reviewer_id = fields.Many2one('res.users', string='Revisor', tracking=True)
 
     date_detected = fields.Date(
-        string='Detection Date',
+        string='Fecha de detección',
         default=fields.Date.context_today,
         required=True,
         tracking=True,
     )
-    date_deadline = fields.Date(string='Deadline', tracking=True)
-    date_closed = fields.Date(string='Closed On', readonly=True, tracking=True)
-    is_overdue = fields.Boolean(string='Overdue', compute='_compute_dates', store=True)
-    days_open = fields.Integer(string='Days Open', compute='_compute_dates')
-    days_to_close = fields.Integer(string='Days to Close', compute='_compute_dates', store=True)
+    date_deadline = fields.Date(string='Fecha límite', tracking=True)
+    date_closed = fields.Date(string='Fecha de cierre', readonly=True, tracking=True)
+    is_overdue = fields.Boolean(string='Vencida', compute='_compute_dates', store=True)
+    days_open = fields.Integer(string='Días abierta', compute='_compute_dates')
+    days_to_close = fields.Integer(string='Días para cerrar', compute='_compute_dates', store=True)
 
-    partner_id = fields.Many2one('res.partner', string='Customer / Supplier', tracking=True, domain="[('is_company', '=', True)]")
-    product_id = fields.Many2one('product.product', string='Product', tracking=True)
-    lot_id = fields.Many2one('stock.production.lot', string='Lot / Serial Number', tracking=True)
-    quantity_affected = fields.Float(string='Affected Quantity', tracking=True)
-    uom_id = fields.Many2one('uom.uom', string='UoM')
-    estimated_cost = fields.Monetary(string='Estimated Cost', currency_field='currency_id', tracking=True)
-    amount_customer = fields.Monetary(string='Final Amount - Customer', currency_field='currency_id', tracking=True)
-    amount_sidsa = fields.Monetary(string='Final Amount - SIDSA', currency_field='currency_id', tracking=True)
-    amount_supplier = fields.Monetary(string='Final Amount - Supplier', currency_field='currency_id', tracking=True)
+    supplier_id = fields.Many2one('res.partner', string='Proveedor', tracking=True, domain="[('is_company', '=', True), ('supplier_rank', '>', 0)]")
+    customer_id = fields.Many2one('res.partner', string='Cliente', tracking=True, domain="[('is_company', '=', True), ('customer_rank', '>', 0)]")
+    product_id = fields.Many2one('product.product', string='Producto', tracking=True)
+    lot_id = fields.Many2one('stock.production.lot', string='Lote / Número de serie', tracking=True)
+    quantity_affected = fields.Float(string='Cantidad afectada', tracking=True)
+    uom_id = fields.Many2one('uom.uom', string='UdM')
+    estimated_cost = fields.Monetary(string='Costo estimado', currency_field='currency_id', tracking=True)
+    amount_customer = fields.Monetary(string='Importe final - Cliente', currency_field='currency_id', tracking=True)
+    amount_sidsa = fields.Monetary(string='Importe final - SIDSA', currency_field='currency_id', tracking=True)
+    amount_supplier = fields.Monetary(string='Importe final - Proveedor', currency_field='currency_id', tracking=True)
 
 
-    assume_cost_customer = fields.Boolean(string='Cost Assumed by Customer', tracking=True)
-    assume_cost_sidsa = fields.Boolean(string='Cost Assumed by SIDSA', tracking=True)
-    assume_cost_supplier = fields.Boolean(string='Cost Assumed by Supplier', tracking=True)
+    assume_cost_customer = fields.Boolean(string='Costo asumido por cliente', tracking=True)
+    assume_cost_sidsa = fields.Boolean(string='Costo asumido por SIDSA', tracking=True)
+    assume_cost_supplier = fields.Boolean(string='Costo asumido por proveedor', tracking=True)
 
     available_sale_order_ids = fields.Many2many(
         'sale.order',
         compute='_compute_available_sale_order_ids',
-        string='Available Sales Orders',
+        string='Pedidos de venta disponibles',
     )
 
-    purchase_id = fields.Many2one('purchase.order', string='Purchase Order', tracking=True)
-    sale_id = fields.Many2one('sale.order', string='Sales Order', tracking=True)
-    picking_id = fields.Many2one('stock.picking', string='Picking', tracking=True)
-    move_line_id = fields.Many2one('stock.move.line', string='Operation Line', tracking=True)
+    purchase_id = fields.Many2one('purchase.order', string='Pedido de compra', tracking=True)
+    sale_id = fields.Many2one('sale.order', string='Pedido de venta', tracking=True)
+    picking_id = fields.Many2one('stock.picking', string='Albarán', tracking=True)
+    move_line_id = fields.Many2one('stock.move.line', string='Línea de operación', tracking=True)
 
-    description = fields.Html(string='Description / Evidence', tracking=True, sanitize=True)
+    description = fields.Html(string='Descripción / Evidencia', tracking=True, sanitize=True)
     containment_action = fields.Html(string='Acciones Inmediatas', tracking=True)
     root_cause = fields.Html(string='Causa Raíz', tracking=True)
     corrective_action = fields.Html(string='Acciones Correctivas', tracking=True)
-    preventive_action = fields.Html(string='Preventive Action / Risk Treatment', tracking=True)
+    preventive_action = fields.Html(string='Acción preventiva / Tratamiento del riesgo', tracking=True)
     effectiveness_check = fields.Html(string='Validación', tracking=True)
-    closing_notes = fields.Text(string='Closing Notes', tracking=True)
-    environmental_impact = fields.Text(string='Environmental Impact / Controls', tracking=True)
+    closing_notes = fields.Text(string='Notas de cierre', tracking=True)
+    environmental_impact = fields.Text(string='Impacto ambiental / Controles', tracking=True)
 
-    attachment_count = fields.Integer(string='Attachments', compute='_compute_attachment_count')
+    attachment_count = fields.Integer(string='Adjuntos', compute='_compute_attachment_count')
 
     @api.model
     def create(self, vals):
@@ -153,21 +154,34 @@ class SidNonconformity(models.Model):
     def _check_assumed_cost_amounts(self):
         for rec in self:
             if rec.assume_cost_customer and not rec.amount_customer:
-                raise ValidationError(_('Customer amount is required when customer assumes the cost.'))
+                raise ValidationError(_('El importe de cliente es obligatorio cuando el cliente asume el costo.'))
             if rec.assume_cost_sidsa and not rec.amount_sidsa:
-                raise ValidationError(_('SIDSA amount is required when SIDSA assumes the cost.'))
+                raise ValidationError(_('El importe de SIDSA es obligatorio cuando SIDSA asume el costo.'))
             if rec.assume_cost_supplier and not rec.amount_supplier:
-                raise ValidationError(_('Supplier amount is required when supplier assumes the cost.'))
+                raise ValidationError(_('El importe de proveedor es obligatorio cuando el proveedor asume el costo.'))
 
-    @api.depends('purchase_id', 'partner_id')
+
+    @api.onchange('purchase_id')
+    def _onchange_purchase_id(self):
+        for rec in self:
+            if rec.purchase_id:
+                rec.supplier_id = rec.purchase_id.partner_id
+
+    @api.onchange('sale_id')
+    def _onchange_sale_id(self):
+        for rec in self:
+            if rec.sale_id:
+                rec.customer_id = rec.sale_id.partner_id
+
+    @api.depends('purchase_id', 'supplier_id')
     def _compute_available_sale_order_ids(self):
         for rec in self:
             sale_orders = self.env['sale.order']
             if rec.purchase_id:
                 sale_orders = rec.purchase_id.order_line.mapped('sale_line_id.order_id')
-            if rec.partner_id:
+            if rec.supplier_id:
                 supplier_purchases = self.env['purchase.order'].search([
-                    ('partner_id', '=', rec.partner_id.id)
+                    ('partner_id', '=', rec.supplier_id.id)
                 ])
                 supplier_sales = supplier_purchases.order_line.mapped('sale_line_id.order_id')
                 sale_orders |= supplier_sales
@@ -221,7 +235,7 @@ class SidNonconformity(models.Model):
         for rec in self:
             previous_state = previous_state_map.get(rec.state)
             if not previous_state:
-                raise UserError(_('No previous phase available from the current state.'))
+                raise UserError(_('No hay una fase anterior disponible desde el estado actual.'))
             vals = {'state': previous_state}
             if previous_state != 'done':
                 vals['date_closed'] = False
@@ -246,15 +260,15 @@ class SidNonconformity(models.Model):
         for rec in self:
             missing = []
             if not rec.root_cause:
-                missing.append(_('Root Cause Analysis'))
+                missing.append(_('Análisis de causa raíz'))
             if not rec.corrective_action:
-                missing.append(_('Corrective Action'))
+                missing.append(_('Acción correctiva'))
             if rec.state == 'verify' and not rec.effectiveness_check:
-                missing.append(_('Effectiveness Check'))
+                missing.append(_('Verificación de eficacia'))
             if not any([rec.assume_cost_customer, rec.assume_cost_sidsa, rec.assume_cost_supplier]):
-                missing.append(_('At least one cost responsibility (Customer, SIDSA, Supplier)'))
+                missing.append(_('Al menos una responsabilidad de costo (Cliente, SIDSA, Proveedor)'))
             if missing:
-                raise UserError(_('You cannot close the nonconformity until these fields are completed: %s') % ', '.join(missing))
+                raise UserError(_('No puede cerrar la no conformidad hasta completar estos campos: %s') % ', '.join(missing))
             rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
             rec._post_phase_report_to_chatter(
                 message=_('Formulario PDF generado automáticamente al cerrar la no conformidad.')
@@ -269,7 +283,7 @@ class SidNonconformity(models.Model):
     def action_view_attachments(self):
         self.ensure_one()
         return {
-            'name': _('Attachments'),
+            'name': _('Adjuntos'),
             'type': 'ir.actions.act_window',
             'res_model': 'ir.attachment',
             'view_mode': 'kanban,tree,form',
