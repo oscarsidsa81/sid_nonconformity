@@ -95,7 +95,8 @@ class SidNonconformity(models.Model):
     days_open = fields.Integer(string='Días abierta', compute='_compute_dates')
     days_to_close = fields.Integer(string='Días para cerrar', compute='_compute_dates', store=True)
 
-    partner_id = fields.Many2one('res.partner', string='Cliente / Proveedor', tracking=True, domain="[('is_company', '=', True)]")
+    supplier_id = fields.Many2one('res.partner', string='Proveedor', tracking=True, domain="[('is_company', '=', True), ('supplier_rank', '>', 0)]")
+    customer_id = fields.Many2one('res.partner', string='Cliente', tracking=True, domain="[('is_company', '=', True), ('customer_rank', '>', 0)]")
     product_id = fields.Many2one('product.product', string='Producto', tracking=True)
     lot_id = fields.Many2one('stock.production.lot', string='Lote / Número de serie', tracking=True)
     quantity_affected = fields.Float(string='Cantidad afectada', tracking=True)
@@ -159,15 +160,28 @@ class SidNonconformity(models.Model):
             if rec.assume_cost_supplier and not rec.amount_supplier:
                 raise ValidationError(_('El importe de proveedor es obligatorio cuando el proveedor asume el costo.'))
 
-    @api.depends('purchase_id', 'partner_id')
+
+    @api.onchange('purchase_id')
+    def _onchange_purchase_id(self):
+        for rec in self:
+            if rec.purchase_id:
+                rec.supplier_id = rec.purchase_id.partner_id
+
+    @api.onchange('sale_id')
+    def _onchange_sale_id(self):
+        for rec in self:
+            if rec.sale_id:
+                rec.customer_id = rec.sale_id.partner_id
+
+    @api.depends('purchase_id', 'supplier_id')
     def _compute_available_sale_order_ids(self):
         for rec in self:
             sale_orders = self.env['sale.order']
             if rec.purchase_id:
                 sale_orders = rec.purchase_id.order_line.mapped('sale_line_id.order_id')
-            if rec.partner_id:
+            if rec.supplier_id:
                 supplier_purchases = self.env['purchase.order'].search([
-                    ('partner_id', '=', rec.partner_id.id)
+                    ('partner_id', '=', rec.supplier_id.id)
                 ])
                 supplier_sales = supplier_purchases.order_line.mapped('sale_line_id.order_id')
                 sale_orders |= supplier_sales

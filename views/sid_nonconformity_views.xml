@@ -12,7 +12,8 @@
                 <field name="iso_scope"/>
                 <field name="severity"/>
                 <field name="priority"/>
-                <field name="partner_id" domain="[('is_company', '=', True)]"/>
+                <field name="supplier_id"/>
+                <field name="customer_id"/>
                 <field name="product_id"/>
                 <field name="user_id"/>
                 <field name="reviewer_id"/>
@@ -33,7 +34,8 @@
                 <field name="state"/>
                 <field name="priority"/>
                 <field name="severity"/>
-                <field name="partner_id" domain="[('is_company', '=', True)]"/>
+                <field name="supplier_id"/>
+                <field name="customer_id"/>
                 <field name="user_id"/>
                 <field name="date_deadline"/>
                 <field name="is_overdue"/>
@@ -42,7 +44,8 @@
                         <div t-attf-class="oe_kanban_global_click o_kanban_record #{record.is_overdue.raw_value ? 'oe_kanban_color_2' : ''}">
                             <strong><field name="name"/> - <field name="title"/></strong>
                             <div><field name="nc_type"/> / <field name="severity"/></div>
-                            <div t-if="record.partner_id.raw_value"><field name="partner_id" domain="[('is_company', '=', True)]"/></div>
+                            <div t-if="record.supplier_id.raw_value"><field name="supplier_id"/></div>
+                            <div t-if="record.customer_id.raw_value"><field name="customer_id"/></div>
                             <div t-if="record.date_deadline.raw_value">Fecha límite: <field name="date_deadline"/></div>
                             <div class="oe_kanban_footer">
                                 <field name="user_id"/>
@@ -61,9 +64,10 @@
             <search>
                 <field name="name"/>
                 <field name="title"/>
-                <field name="partner_id" domain="[('is_company', '=', True)]"/>
+                <field name="supplier_id"/>
+                <field name="customer_id"/>
                 <field name="product_id"/>
-                <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
+                <field name="purchase_id" domain="[('partner_id', '=', supplier_id)]"/>
                 <field name="available_sale_order_ids" invisible="1"/>
                 <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
                 <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
@@ -76,7 +80,8 @@
                 <group expand="0" string="Agrupar por">
                     <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
                     <filter name="group_type" string="Tipo" context="{'group_by': 'nc_type'}"/>
-                    <filter name="group_partner" string="Cliente / Proveedor" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_supplier" string="Proveedor" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_customer" string="Cliente" context="{'group_by': 'customer_id'}"/>
                     <filter name="group_responsible" string="Responsable" context="{'group_by': 'user_id'}"/>
                     <filter name="group_month" string="Mes de detección" context="{'group_by': 'date_detected:month'}"/>
                 </group>
@@ -132,8 +137,9 @@
                         <page string="Origen">
                             <group>
                                 <group string="Enlaces operativos">
-                                    <field name="partner_id" domain="[('is_company', '=', True)]"/>
-                                    <field name="purchase_id" domain="[('partner_id', '=', partner_id)]"/>
+                                    <field name="supplier_id" attrs="{'readonly': [('purchase_id', '!=', False)]}"/>
+                                    <field name="customer_id" attrs="{'readonly': [('sale_id', '!=', False)]}"/>
+                                    <field name="purchase_id" domain="[('partner_id', '=', supplier_id)]"/>
                                     <field name="available_sale_order_ids" invisible="1"/>
                                     <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
                                     <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
