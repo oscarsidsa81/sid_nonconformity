@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_sid_quality_root" name="Quality / ISO" sequence="70" groups="sid_nonconformity.group_sid_nonconformity_user"/>
+    <menuitem id="menu_sid_quality_root" name="NCR/ISO" sequence="70" web_icon="sid_nonconformity,static/description/icon.png" groups="sid_nonconformity.group_sid_nonconformity_user"/>
     <menuitem id="menu_sid_nonconformity_root" name="Nonconformities" parent="menu_sid_quality_root" action="action_sid_nonconformity" sequence="10" groups="sid_nonconformity.group_sid_nonconformity_user"/>
 </odoo>
