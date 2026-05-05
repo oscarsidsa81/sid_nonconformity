@@ -15,6 +15,7 @@
                 <field name="partner_id" domain="[('is_company', '=', True)]"/>
                 <field name="product_id"/>
                 <field name="user_id"/>
+                <field name="reviewer_id"/>
                 <field name="date_detected"/>
                 <field name="date_deadline"/>
                 <field name="is_overdue"/>
@@ -44,7 +45,7 @@
                             <div t-if="record.partner_id.raw_value"><field name="partner_id" domain="[('is_company', '=', True)]"/></div>
                             <div t-if="record.date_deadline.raw_value">Fecha límite: <field name="date_deadline"/></div>
                             <div class="oe_kanban_footer">
-                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="user_id"/>
                             </div>
                         </div>
                     </t>
@@ -119,8 +120,8 @@
                             <field name="is_overdue" readonly="1"/>
                         </group>
                         <group string="Responsabilidades y fechas">
-                            <field name="user_id" widget="many2one_avatar_user"/>
-                            <field name="reviewer_id" widget="many2one_avatar_user" readonly="0"/>
+                            <field name="user_id"/>
+                            <field name="reviewer_id"/>
                             <field name="date_detected"/>
                             <field name="date_deadline"/>
                             <field name="date_closed" readonly="1"/>
