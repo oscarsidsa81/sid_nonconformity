@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'SID Nonconformity Management',
+    'name': 'sid_nonconformity',
     'version': '15.0.1.0.0',
     'category': 'Quality',
     'summary': 'Simple nonconformity tracking for ISO 9001/14001 distribution workflows.',
