@@ -145,7 +145,10 @@ class SidNonconformity(models.Model):
     corrective_action = fields.Html(string='Acciones Correctivas', tracking=True)
     preventive_action = fields.Html(string='Acción preventiva / Tratamiento del riesgo', tracking=True)
     effectiveness_check = fields.Html(string='Validación', tracking=True)
-    closing_notes = fields.Text(string='Notas de cierre', tracking=True)
+    closing_notes = fields.Text(string='Notas de cierre (legado)', tracking=True)
+    closing_notes_internal = fields.Text(string='Notas de cierre internas', tracking=True)
+    closing_notes_customer = fields.Text(string='Notas de cierre para cliente', tracking=True)
+    closing_notes_supplier = fields.Text(string='Notas de cierre para proveedor', tracking=True)
     environmental_impact = fields.Text(string='Impacto ambiental / Controles', tracking=True)
 
     attachment_count = fields.Integer(string='Adjuntos', compute='_compute_attachment_count')
@@ -155,9 +158,16 @@ class SidNonconformity(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('sid.nonconformity') or _('New')
         record = super().create(vals)
+        record._sync_partners_from_documents()
         if record.user_id:
             record.message_subscribe(partner_ids=record.user_id.partner_id.ids)
         return record
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'purchase_id' in vals or 'sale_id' in vals:
+            self._sync_partners_from_documents()
+        return res
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -180,14 +190,17 @@ class SidNonconformity(models.Model):
 
     @api.onchange('purchase_id')
     def _onchange_purchase_id(self):
-        for rec in self:
-            if rec.purchase_id:
-                rec.supplier_id = rec.purchase_id.partner_id
+        self._sync_partners_from_documents()
 
     @api.onchange('sale_id')
     def _onchange_sale_id(self):
+        self._sync_partners_from_documents()
+
+    def _sync_partners_from_documents(self):
         for rec in self:
-            if rec.sale_id:
+            if rec.purchase_id and not rec.supplier_id:
+                rec.supplier_id = rec.purchase_id.partner_id
+            if rec.sale_id and not rec.customer_id:
                 rec.customer_id = rec.sale_id.partner_id
 
     @api.depends('purchase_id', 'supplier_id')
