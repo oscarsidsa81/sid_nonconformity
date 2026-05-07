@@ -8,6 +8,7 @@ class PurchaseOrder(models.Model):
     sid_nonconformity_ids = fields.One2many('sid.nonconformity', 'purchase_id', string='Nonconformities')
     sid_nonconformity_count = fields.Integer(compute='_compute_sid_nonconformity_count', string='NCs')
 
+    @api.depends('sid_nonconformity_ids')
     def _compute_sid_nonconformity_count(self):
         for rec in self:
             rec.sid_nonconformity_count = len(rec.sid_nonconformity_ids)
@@ -49,6 +50,7 @@ class SaleOrder(models.Model):
     sid_nonconformity_ids = fields.One2many('sid.nonconformity', 'sale_id', string='Nonconformities')
     sid_nonconformity_count = fields.Integer(compute='_compute_sid_nonconformity_count', string='NCs')
 
+    @api.depends('sid_nonconformity_ids')
     def _compute_sid_nonconformity_count(self):
         for rec in self:
             rec.sid_nonconformity_count = len(rec.sid_nonconformity_ids)
@@ -90,6 +92,7 @@ class StockPicking(models.Model):
     sid_nonconformity_ids = fields.One2many('sid.nonconformity', 'picking_id', string='Nonconformities')
     sid_nonconformity_count = fields.Integer(compute='_compute_sid_nonconformity_count', string='NCs')
 
+    @api.depends('sid_nonconformity_ids')
     def _compute_sid_nonconformity_count(self):
         for rec in self:
             rec.sid_nonconformity_count = len(rec.sid_nonconformity_ids)
