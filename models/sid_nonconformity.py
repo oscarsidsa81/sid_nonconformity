@@ -223,23 +223,38 @@ class SidNonconformity(models.Model):
             ])
 
 
+    def _get_report_action_xmlids_for_record(self):
+        self.ensure_one()
+        xmlids = ['sid_nonconformity.action_report_sid_nonconformity_internal']
+        include_customer = bool(self.nc_type == 'customer' or self.customer_id or self.sale_id)
+        include_supplier = bool(self.nc_type == 'supplier' or self.supplier_id or self.purchase_id)
+        if include_customer:
+            xmlids.append('sid_nonconformity.action_report_sid_nonconformity_customer')
+        if include_supplier:
+            xmlids.append('sid_nonconformity.action_report_sid_nonconformity_supplier')
+        return xmlids
+
     def _post_phase_report_to_chatter(self, message=None):
-        report_action = self.env.ref('sid_nonconformity.action_report_sid_nonconformity', raise_if_not_found=False)
-        if not report_action:
-            return
         for rec in self:
-            pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
-            attachment = self.env['ir.attachment'].create({
-                'name': 'NC-%s-%s.pdf' % (rec.name, rec.state),
-                'type': 'binary',
-                'datas': base64.b64encode(pdf_content),
-                'mimetype': 'application/pdf',
-                'res_model': rec._name,
-                'res_id': rec.id,
-            })
+            attachments = []
+            for xmlid in rec._get_report_action_xmlids_for_record():
+                report_action = self.env.ref(xmlid, raise_if_not_found=False)
+                if not report_action:
+                    continue
+                pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
+                audience = xmlid.split('_')[-1]
+                attachment = self.env['ir.attachment'].create({
+                    'name': 'NC-%s-%s-%s.pdf' % (rec.name, rec.state, audience),
+                    'type': 'binary',
+                    'datas': base64.b64encode(pdf_content),
+                    'mimetype': 'application/pdf',
+                    'res_model': rec._name,
+                    'res_id': rec.id,
+                })
+                attachments.append(attachment.id)
             rec.message_post(
                 body=message or _('Reporte de fase generado automáticamente.'),
-                attachment_ids=[attachment.id],
+                attachment_ids=attachments,
             )
 
     def action_previous_phase(self):
