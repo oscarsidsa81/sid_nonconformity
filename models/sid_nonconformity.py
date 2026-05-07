@@ -60,7 +60,24 @@ class SidNonconformity(models.Model):
         ('environment', 'Incidente Ambiental'),
         ('audit', 'Incidencia de Auditoría'),
         ('other', 'Otro'),
-    ], string='Tipo', default='process', required=True, tracking=True)
+    ],
+    string='Tipo',
+    default='process',
+    required=True,
+    tracking=True,
+    help=(
+        'Define la casuística de la NC y la audiencia de reporte prevista.\n'
+        '- Proveedor / Compra: interno + proveedor.\n'
+        '- Reclamación de Cliente: interno + cliente; si hay proveedor/compra vinculados, también proveedor.\n'
+        '- Almacén / Logística: interno; puede añadir cliente/proveedor según vínculos.\n'
+        '- Producto / Especificación: interno; puede añadir cliente/proveedor según vínculos.\n'
+        '- Proceso Interno: solo interno.\n'
+        '- Incidente Ambiental: interno; externo solo si hay tercero afectado.\n'
+        '- Incidencia de Auditoría: solo interno.\n'
+        '- Otro: interno; cliente/proveedor según vínculos.\n'
+        'Regla general: siempre se genera reporte interno.'
+    ),
+)
 
     severity = fields.Selection([
         ('minor', 'Baja'),
@@ -128,7 +145,10 @@ class SidNonconformity(models.Model):
     corrective_action = fields.Html(string='Acciones Correctivas', tracking=True)
     preventive_action = fields.Html(string='Acción preventiva / Tratamiento del riesgo', tracking=True)
     effectiveness_check = fields.Html(string='Validación', tracking=True)
-    closing_notes = fields.Text(string='Notas de cierre', tracking=True)
+    closing_notes = fields.Text(string='Notas de cierre (legado)', tracking=True)
+    closing_notes_internal = fields.Html(string='Notas de cierre internas', tracking=True)
+    closing_notes_customer = fields.Html(string='Notas de cierre para cliente', tracking=True)
+    closing_notes_supplier = fields.Html(string='Notas de cierre para proveedor', tracking=True)
     environmental_impact = fields.Text(string='Impacto ambiental / Controles', tracking=True)
 
     attachment_count = fields.Integer(string='Adjuntos', compute='_compute_attachment_count')
@@ -138,9 +158,16 @@ class SidNonconformity(models.Model):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('sid.nonconformity') or _('New')
         record = super().create(vals)
+        record._sync_partners_from_documents()
         if record.user_id:
             record.message_subscribe(partner_ids=record.user_id.partner_id.ids)
         return record
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'purchase_id' in vals or 'sale_id' in vals:
+            self._sync_partners_from_documents()
+        return res
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -163,14 +190,17 @@ class SidNonconformity(models.Model):
 
     @api.onchange('purchase_id')
     def _onchange_purchase_id(self):
-        for rec in self:
-            if rec.purchase_id:
-                rec.supplier_id = rec.purchase_id.partner_id
+        self._sync_partners_from_documents()
 
     @api.onchange('sale_id')
     def _onchange_sale_id(self):
+        self._sync_partners_from_documents()
+
+    def _sync_partners_from_documents(self):
         for rec in self:
-            if rec.sale_id:
+            if rec.purchase_id and not rec.supplier_id:
+                rec.supplier_id = rec.purchase_id.partner_id
+            if rec.sale_id and not rec.customer_id:
                 rec.customer_id = rec.sale_id.partner_id
 
     @api.depends('purchase_id', 'supplier_id')
@@ -206,23 +236,38 @@ class SidNonconformity(models.Model):
             ])
 
 
+    def _get_report_action_xmlids_for_record(self):
+        self.ensure_one()
+        xmlids = ['sid_nonconformity.action_report_sid_nonconformity_internal']
+        include_customer = bool(self.nc_type == 'customer' or self.customer_id or self.sale_id)
+        include_supplier = bool(self.nc_type == 'supplier' or self.supplier_id or self.purchase_id)
+        if include_customer:
+            xmlids.append('sid_nonconformity.action_report_sid_nonconformity_customer')
+        if include_supplier:
+            xmlids.append('sid_nonconformity.action_report_sid_nonconformity_supplier')
+        return xmlids
+
     def _post_phase_report_to_chatter(self, message=None):
-        report_action = self.env.ref('sid_nonconformity.action_report_sid_nonconformity', raise_if_not_found=False)
-        if not report_action:
-            return
         for rec in self:
-            pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
-            attachment = self.env['ir.attachment'].create({
-                'name': 'NC-%s-%s.pdf' % (rec.name, rec.state),
-                'type': 'binary',
-                'datas': base64.b64encode(pdf_content),
-                'mimetype': 'application/pdf',
-                'res_model': rec._name,
-                'res_id': rec.id,
-            })
+            attachments = []
+            for xmlid in rec._get_report_action_xmlids_for_record():
+                report_action = self.env.ref(xmlid, raise_if_not_found=False)
+                if not report_action:
+                    continue
+                pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
+                audience = xmlid.split('_')[-1]
+                attachment = self.env['ir.attachment'].create({
+                    'name': 'NC-%s-%s-%s.pdf' % (rec.name, rec.state, audience),
+                    'type': 'binary',
+                    'datas': base64.b64encode(pdf_content),
+                    'mimetype': 'application/pdf',
+                    'res_model': rec._name,
+                    'res_id': rec.id,
+                })
+                attachments.append(attachment.id)
             rec.message_post(
                 body=message or _('Reporte de fase generado automáticamente.'),
-                attachment_ids=[attachment.id],
+                attachment_ids=attachments,
             )
 
     def action_previous_phase(self):
@@ -243,6 +288,8 @@ class SidNonconformity(models.Model):
 
     def action_open(self):
         for rec in self:
+            if not rec.description:
+                raise UserError(_('Debe completar la descripción/evidencia antes de abrir la no conformidad.'))
             old_state = rec.state
             rec.write({'state': 'open'})
             if old_state == 'draft':
@@ -267,6 +314,12 @@ class SidNonconformity(models.Model):
                 missing.append(_('Verificación de eficacia'))
             if not any([rec.assume_cost_customer, rec.assume_cost_sidsa, rec.assume_cost_supplier]):
                 missing.append(_('Al menos una responsabilidad de costo (Cliente, SIDSA, Proveedor)'))
+            if not rec.closing_notes_internal:
+                missing.append(_('Notas de cierre internas'))
+            if (rec.nc_type == 'customer' or rec.customer_id or rec.sale_id) and not rec.closing_notes_customer:
+                missing.append(_('Notas de cierre para cliente'))
+            if (rec.nc_type == 'supplier' or rec.supplier_id or rec.purchase_id) and not rec.closing_notes_supplier:
+                missing.append(_('Notas de cierre para proveedor'))
             if missing:
                 raise UserError(_('No puede cerrar la no conformidad hasta completar estos campos: %s') % ', '.join(missing))
             rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
