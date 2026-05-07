@@ -66,10 +66,16 @@ class SidNonconformity(models.Model):
     required=True,
     tracking=True,
     help=(
-        'Define la casuística de la NC y qué reportes externos pueden aplicar.\n'
-        '- Proveedor / Compra: orientada a proveedor (normalmente interno + proveedor).\n'
-        '- Reclamación de Cliente: orientada a cliente (normalmente interno + cliente; puede incluir proveedor si hay compra/proveedor vinculado).\n'
-        '- Almacén / Logística, Producto, Proceso, Ambiental, Auditoría, Otro: tipologías para clasificación interna y trazabilidad.'
+        'Define la casuística de la NC y la audiencia de reporte prevista.\n'
+        '- Proveedor / Compra: interno + proveedor.\n'
+        '- Reclamación de Cliente: interno + cliente; si hay proveedor/compra vinculados, también proveedor.\n'
+        '- Almacén / Logística: interno; puede añadir cliente/proveedor según vínculos.\n'
+        '- Producto / Especificación: interno; puede añadir cliente/proveedor según vínculos.\n'
+        '- Proceso Interno: solo interno.\n'
+        '- Incidente Ambiental: interno; externo solo si hay tercero afectado.\n'
+        '- Incidencia de Auditoría: solo interno.\n'
+        '- Otro: interno; cliente/proveedor según vínculos.\n'
+        'Regla general: siempre se genera reporte interno.'
     ),
 )
 
