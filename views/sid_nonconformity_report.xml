@@ -84,6 +84,7 @@
                                 <tr><td><strong>ISO Scope</strong></td><td><span t-field="o.iso_scope"/></td></tr>
                                 <tr><td><strong>Severity</strong></td><td><span t-field="o.severity"/></td></tr>
                                 <tr><td><strong>Priority</strong></td><td><span t-field="o.priority"/></td></tr>
+                                <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
                                 <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
                                 <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
                                 <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
@@ -116,6 +117,7 @@
                         <table class="table table-sm o_main_table"><tbody>
                             <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
                             <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                            <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
                             <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
                             <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
                         </tbody></table>

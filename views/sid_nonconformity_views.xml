@@ -183,9 +183,9 @@
                             </group>
                             <group string="Notas de cierre">
                                 <group string="Notas de cierre por audiencia" col="1">
-                                    <field name="closing_notes_internal" widget="html" placeholder="Resumen interno completo de cierre."/>
-                                    <field name="closing_notes_customer" widget="html" placeholder="Texto que se compartirá con cliente."/>
-                                    <field name="closing_notes_supplier" widget="html" placeholder="Texto que se compartirá con proveedor."/>
+                                    <field name="closing_notes_internal" widget="html" nolabel="1" placeholder="Resumen interno completo de cierre."/>
+                                    <field name="closing_notes_customer" widget="html" nolabel="1" placeholder="Texto que se compartirá con cliente."/>
+                                    <field name="closing_notes_supplier" widget="html" nolabel="1" placeholder="Texto que se compartirá con proveedor."/>
                                 </group>
                             </group>
                         </page>
