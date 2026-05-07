@@ -146,9 +146,9 @@ class SidNonconformity(models.Model):
     preventive_action = fields.Html(string='Acción preventiva / Tratamiento del riesgo', tracking=True)
     effectiveness_check = fields.Html(string='Validación', tracking=True)
     closing_notes = fields.Text(string='Notas de cierre (legado)', tracking=True)
-    closing_notes_internal = fields.Text(string='Notas de cierre internas', tracking=True)
-    closing_notes_customer = fields.Text(string='Notas de cierre para cliente', tracking=True)
-    closing_notes_supplier = fields.Text(string='Notas de cierre para proveedor', tracking=True)
+    closing_notes_internal = fields.Html(string='Notas de cierre internas', tracking=True)
+    closing_notes_customer = fields.Html(string='Notas de cierre para cliente', tracking=True)
+    closing_notes_supplier = fields.Html(string='Notas de cierre para proveedor', tracking=True)
     environmental_impact = fields.Text(string='Impacto ambiental / Controles', tracking=True)
 
     attachment_count = fields.Integer(string='Adjuntos', compute='_compute_attachment_count')
@@ -288,6 +288,8 @@ class SidNonconformity(models.Model):
 
     def action_open(self):
         for rec in self:
+            if not rec.description:
+                raise UserError(_('Debe completar la descripción/evidencia antes de abrir la no conformidad.'))
             old_state = rec.state
             rec.write({'state': 'open'})
             if old_state == 'draft':
@@ -312,6 +314,12 @@ class SidNonconformity(models.Model):
                 missing.append(_('Verificación de eficacia'))
             if not any([rec.assume_cost_customer, rec.assume_cost_sidsa, rec.assume_cost_supplier]):
                 missing.append(_('Al menos una responsabilidad de costo (Cliente, SIDSA, Proveedor)'))
+            if not rec.closing_notes_internal:
+                missing.append(_('Notas de cierre internas'))
+            if (rec.nc_type == 'customer' or rec.customer_id or rec.sale_id) and not rec.closing_notes_customer:
+                missing.append(_('Notas de cierre para cliente'))
+            if (rec.nc_type == 'supplier' or rec.supplier_id or rec.purchase_id) and not rec.closing_notes_supplier:
+                missing.append(_('Notas de cierre para proveedor'))
             if missing:
                 raise UserError(_('No puede cerrar la no conformidad hasta completar estos campos: %s') % ', '.join(missing))
             rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
