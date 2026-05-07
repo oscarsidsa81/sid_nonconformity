@@ -60,7 +60,18 @@ class SidNonconformity(models.Model):
         ('environment', 'Incidente Ambiental'),
         ('audit', 'Incidencia de Auditoría'),
         ('other', 'Otro'),
-    ], string='Tipo', default='process', required=True, tracking=True)
+    ],
+    string='Tipo',
+    default='process',
+    required=True,
+    tracking=True,
+    help=(
+        'Define la casuística de la NC y qué reportes externos pueden aplicar.\n'
+        '- Proveedor / Compra: orientada a proveedor (normalmente interno + proveedor).\n'
+        '- Reclamación de Cliente: orientada a cliente (normalmente interno + cliente; puede incluir proveedor si hay compra/proveedor vinculado).\n'
+        '- Almacén / Logística, Producto, Proceso, Ambiental, Auditoría, Otro: tipologías para clasificación interna y trazabilidad.'
+    ),
+)
 
     severity = fields.Selection([
         ('minor', 'Baja'),
