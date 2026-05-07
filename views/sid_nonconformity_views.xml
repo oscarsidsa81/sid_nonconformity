@@ -137,8 +137,8 @@
                         <page string="Origen">
                             <group>
                                 <group string="Enlaces operativos">
-                                    <field name="supplier_id" attrs="{'readonly': [('purchase_id', '!=', False)]}"/>
-                                    <field name="customer_id" attrs="{'readonly': [('sale_id', '!=', False)]}"/>
+                                    <field name="supplier_id"/>
+                                    <field name="customer_id"/>
                                     <field name="purchase_id" domain="[('partner_id', '=', supplier_id)]"/>
                                     <field name="available_sale_order_ids" invisible="1"/>
                                     <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
@@ -182,7 +182,11 @@
                                 <field name="effectiveness_check" nolabel="1" placeholder="¿Cómo se verificó la acción? Fecha, evidencia y resultado."/>
                             </group>
                             <group string="Notas de cierre">
-                                <field name="closing_notes" nolabel="1"/>
+                                <group string="Notas de cierre por audiencia" col="1">
+                                    <field name="closing_notes_internal" widget="html" placeholder="Resumen interno completo de cierre."/>
+                                    <field name="closing_notes_customer" widget="html" placeholder="Texto que se compartirá con cliente."/>
+                                    <field name="closing_notes_supplier" widget="html" placeholder="Texto que se compartirá con proveedor."/>
+                                </group>
                             </group>
                         </page>
                         <page string="Ambiental">
