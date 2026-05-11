@@ -274,10 +274,12 @@ class SidNonconformity(models.Model):
 
     def _get_report_lang_for_audience(self, audience):
         self.ensure_one()
+        customer_partner = self.customer_id.commercial_partner_id or self.sale_id.partner_id.commercial_partner_id
+        supplier_partner = self.supplier_id.commercial_partner_id or self.purchase_id.partner_id.commercial_partner_id
         if audience == 'customer':
-            return (self.customer_id.lang or self.sale_id.partner_id.lang or '').strip() or False
+            return (customer_partner.lang or self.customer_id.lang or self.sale_id.partner_id.lang or '').strip() or False
         if audience == 'supplier':
-            return (self.supplier_id.lang or self.purchase_id.partner_id.lang or '').strip() or False
+            return (supplier_partner.lang or self.supplier_id.lang or self.purchase_id.partner_id.lang or '').strip() or False
         return (self.env.user.lang or '').strip() or False
 
     def action_previous_phase(self):
