@@ -81,6 +81,7 @@ class SidNonconformity(models.Model):
 
     severity = fields.Selection([
         ('minor', 'Baja'),
+        ('med', 'Media'),
         ('major', 'Alta'),
         ('critical', 'Crítica'),
     ], string='Importancia', default='minor', tracking=True)
@@ -122,7 +123,6 @@ class SidNonconformity(models.Model):
     amount_customer = fields.Monetary(string='Importe final - Cliente', currency_field='currency_id', tracking=True)
     amount_sidsa = fields.Monetary(string='Importe final - SIDSA', currency_field='currency_id', tracking=True)
     amount_supplier = fields.Monetary(string='Importe final - Proveedor', currency_field='currency_id', tracking=True)
-
 
     assume_cost_customer = fields.Boolean(string='Costo asumido por cliente', tracking=True)
     assume_cost_sidsa = fields.Boolean(string='Costo asumido por SIDSA', tracking=True)
@@ -174,8 +174,6 @@ class SidNonconformity(models.Model):
         for rec in self:
             if rec.product_id and not rec.uom_id:
                 rec.uom_id = rec.product_id.uom_id
-
-
 
     @api.constrains('assume_cost_customer', 'assume_cost_sidsa', 'assume_cost_supplier', 'amount_customer', 'amount_sidsa', 'amount_supplier')
     def _check_assumed_cost_amounts(self):

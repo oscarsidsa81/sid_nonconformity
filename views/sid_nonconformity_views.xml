@@ -101,7 +101,7 @@
                     <button name="action_close" type="object" string="Cerrar" states="action,verify" class="oe_highlight"/>
                     <button name="action_cancel" type="object" string="Cancelar" states="draft,open,action,verify"/>
                     <button name="action_previous_phase" type="object" string="Fase anterior" states="open,action,verify,done"/>
-                    <button name="%(action_report_sid_nonconformity)d" type="action" string="Imprimir PDF de fase" class="btn-secondary"/>
+                    <button name="%(action_report_sid_nonconformity_internal)d" type="action" string="Imprimir PDF de fase" class="btn-secondary"/>
                     <button name="action_reset_to_draft" type="object" string="Reiniciar a borrador" states="cancel"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,action,verify,done"/>
                 </header>

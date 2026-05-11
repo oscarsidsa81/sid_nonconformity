@@ -15,13 +15,13 @@ class PurchaseOrder(models.Model):
 
     def action_view_sid_nonconformities(self):
         self.ensure_one()
-        return self._sid_nc_action([('purchase_id', '=', self.id)], {'default_purchase_id': self.id, 'default_partner_id': self.partner_id.id, 'default_nc_type': 'supplier'})
+        return self._sid_nc_action([('purchase_id', '=', self.id)], {'default_purchase_id': self.id, 'default_supplier_id': self.partner_id.id, 'default_nc_type': 'supplier'})
 
     def action_create_sid_nonconformity(self):
         self.ensure_one()
         ctx = {
             'default_purchase_id': self.id,
-            'default_partner_id': self.partner_id.id,
+            'default_supplier_id': self.partner_id.id,
             'default_nc_type': 'supplier',
             'default_title': _('Supplier nonconformity - %s') % (self.name or ''),
         }
@@ -57,13 +57,13 @@ class SaleOrder(models.Model):
 
     def action_view_sid_nonconformities(self):
         self.ensure_one()
-        return self._sid_nc_action([('sale_id', '=', self.id)], {'default_sale_id': self.id, 'default_partner_id': self.partner_id.id, 'default_nc_type': 'customer'})
+        return self._sid_nc_action([('sale_id', '=', self.id)], {'default_sale_id': self.id, 'default_customer_id': self.partner_id.id, 'default_nc_type': 'customer'})
 
     def action_create_sid_nonconformity(self):
         self.ensure_one()
         ctx = {
             'default_sale_id': self.id,
-            'default_partner_id': self.partner_id.id,
+            'default_customer_id': self.partner_id.id,
             'default_nc_type': 'customer',
             'default_title': _('Customer nonconformity - %s') % (self.name or ''),
         }
@@ -97,18 +97,29 @@ class StockPicking(models.Model):
         for rec in self:
             rec.sid_nonconformity_count = len(rec.sid_nonconformity_ids)
 
-    def action_view_sid_nonconformities(self):
-        self.ensure_one()
-        return self._sid_nc_action([('picking_id', '=', self.id)], {'default_picking_id': self.id, 'default_partner_id': self.partner_id.id, 'default_nc_type': 'warehouse'})
-
-    def action_create_sid_nonconformity(self):
+    def _get_sid_nc_picking_context(self):
         self.ensure_one()
         ctx = {
             'default_picking_id': self.id,
-            'default_partner_id': self.partner_id.id,
             'default_nc_type': 'warehouse',
-            'default_title': _('Logistics nonconformity - %s') % (self.name or ''),
         }
+        if self.partner_id:
+            if self.picking_type_code == 'incoming':
+                ctx['default_supplier_id'] = self.partner_id.id
+            elif self.picking_type_code == 'outgoing':
+                ctx['default_customer_id'] = self.partner_id.id
+        return ctx
+
+    def action_view_sid_nonconformities(self):
+        self.ensure_one()
+        return self._sid_nc_action([('picking_id', '=', self.id)], self._get_sid_nc_picking_context())
+
+    def action_create_sid_nonconformity(self):
+        self.ensure_one()
+        ctx = self._get_sid_nc_picking_context()
+        ctx.update({
+            'default_title': _('Logistics nonconformity - %s') % (self.name or ''),
+        })
         return self._sid_nc_form_action(ctx)
 
     def _sid_nc_action(self, domain, context):

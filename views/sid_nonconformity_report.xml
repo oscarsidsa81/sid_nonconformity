@@ -6,20 +6,11 @@
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_internal</field>
         <field name="report_file">sid_nonconformity.report_sid_nonconformity_document_internal</field>
-        <field name="print_report_name">'NC-%s-%s' % (object.name, object.state)</field>
+        <field name="print_report_name">'NC-%s-%s-internal' % (object.name, object.state)</field>
         <field name="binding_model_id" ref="model_sid_nonconformity"/>
         <field name="binding_type">report</field>
     </record>
-    <record id="action_report_sid_nonconformity" model="ir.actions.report">
-        <field name="name">Nonconformity Phase Report</field>
-        <field name="model">sid.nonconformity</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_internal</field>
-        <field name="report_file">sid_nonconformity.report_sid_nonconformity_document_internal</field>
-        <field name="print_report_name">'NC-%s-%s' % (object.name, object.state)</field>
-        <field name="binding_model_id" ref="model_sid_nonconformity"/>
-        <field name="binding_type">report</field>
-    </record>
+
     <record id="action_report_sid_nonconformity_customer" model="ir.actions.report">
         <field name="name">Nonconformity Phase Report (Customer)</field>
         <field name="model">sid.nonconformity</field>
@@ -27,7 +18,10 @@
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_customer</field>
         <field name="report_file">sid_nonconformity.report_sid_nonconformity_document_customer</field>
         <field name="print_report_name">'NC-%s-%s-customer' % (object.name, object.state)</field>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">report</field>
     </record>
+
     <record id="action_report_sid_nonconformity_supplier" model="ir.actions.report">
         <field name="name">Nonconformity Phase Report (Supplier)</field>
         <field name="model">sid.nonconformity</field>
@@ -35,126 +29,170 @@
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_supplier</field>
         <field name="report_file">sid_nonconformity.report_sid_nonconformity_document_supplier</field>
         <field name="print_report_name">'NC-%s-%s-supplier' % (object.name, object.state)</field>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">report</field>
+    </record>
+
+
+    <record id="server_action_print_sid_nonconformity_internal" model="ir.actions.server">
+        <field name="name">Print Nonconformity Report (Internal)</field>
+        <field name="model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = env.ref('sid_nonconformity.action_report_sid_nonconformity_internal').report_action(records)</field>
+    </record>
+
+    <record id="server_action_print_sid_nonconformity_customer" model="ir.actions.server">
+        <field name="name">Print Nonconformity Report (Customer)</field>
+        <field name="model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = env.ref('sid_nonconformity.action_report_sid_nonconformity_customer').report_action(records)</field>
+    </record>
+
+    <record id="server_action_print_sid_nonconformity_supplier" model="ir.actions.server">
+        <field name="name">Print Nonconformity Report (Supplier)</field>
+        <field name="model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_model_id" ref="model_sid_nonconformity"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = env.ref('sid_nonconformity.action_report_sid_nonconformity_supplier').report_action(records)</field>
     </record>
 
     <template id="report_sid_nonconformity_document_internal">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-call="web.external_layout">
-                    <div class="page">
-                        <style>
-                            .nc-ribbon-wrap {
-                                position: relative;
-                                min-height: 42px;
-                            }
-
-                            .nc-state-ribbon {
-                                position: absolute;
-                                top: 0;
-                                right: 0;
-                                padding: 4px 14px;
-                                color: #ffffff;
-                                font-weight: 700;
-                                border-radius: 0 0 0 8px;
-                                text-transform: uppercase;
-                                font-size: 11px;
-                                letter-spacing: 0.4px;
-                            }
-
-                            .nc-state-ribbon.draft { background-color: #6c757d; }
-                            .nc-state-ribbon.open { background-color: #0d6efd; }
-                            .nc-state-ribbon.action { background-color: #fd7e14; }
-                            .nc-state-ribbon.verify { background-color: #6f42c1; }
-                            .nc-state-ribbon.done { background-color: #198754; }
-                            .nc-state-ribbon.cancel { background-color: #dc3545; }
-                        </style>
-
-                        <div class="nc-ribbon-wrap">
-                            <div t-attf-class="nc-state-ribbon {{ o.state }}">
-                                <span t-field="o.state"/>
-                            </div>
-                        </div>
-
-                        <h2>Nonconformity Report - <span t-field="o.name"/></h2>
-                        <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
-                        <table class="table table-sm o_main_table">
-                            <tbody>
-                                <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                                <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                                <tr><td><strong>ISO Scope</strong></td><td><span t-field="o.iso_scope"/></td></tr>
-                                <tr><td><strong>Severity</strong></td><td><span t-field="o.severity"/></td></tr>
-                                <tr><td><strong>Priority</strong></td><td><span t-field="o.priority"/></td></tr>
-                                <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
-                                <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
-                                <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
-                                <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
-                                <tr><td><strong>Detection date</strong></td><td><span t-field="o.date_detected"/></td></tr>
-                                <tr><td><strong>Deadline</strong></td><td><span t-field="o.date_deadline"/></td></tr>
-                            </tbody>
-                        </table>
-
-                        <h4>Progress by phase</h4>
-                        <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                        <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                        <p><strong>Root Cause:</strong> <span t-field="o.root_cause"/></p>
-                        <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                        <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                        <p><strong>Effectiveness Check:</strong> <span t-field="o.effectiveness_check"/></p>
-                        <p><strong>Closing Notes (Internal):</strong> <span t-field="o.closing_notes_internal"/></p>
-                    </div>
-                </t>
+                <t t-set="doc_lang" t-value="env.user.lang or 'en_US'"/>
+                <t t-call="sid_nonconformity.report_sid_nonconformity_document_internal_body" t-lang="doc_lang"/>
             </t>
+        </t>
+    </template>
+
+    <template id="report_sid_nonconformity_document_internal_body">
+        <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
+        <t t-call="web.external_layout">
+            <div class="page">
+                <style>
+                    .nc-ribbon-wrap { position: relative; min-height: 42px; }
+                    .nc-state-ribbon {
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        padding: 4px 14px;
+                        color: #ffffff;
+                        font-weight: 700;
+                        border-radius: 0 0 0 8px;
+                        text-transform: uppercase;
+                        font-size: 11px;
+                        letter-spacing: 0.4px;
+                    }
+                    .nc-state-ribbon.draft { background-color: #6c757d; }
+                    .nc-state-ribbon.open { background-color: #0d6efd; }
+                    .nc-state-ribbon.action { background-color: #fd7e14; }
+                    .nc-state-ribbon.verify { background-color: #6f42c1; }
+                    .nc-state-ribbon.done { background-color: #198754; }
+                    .nc-state-ribbon.cancel { background-color: #dc3545; }
+                </style>
+
+                <div class="nc-ribbon-wrap">
+                    <div t-attf-class="nc-state-ribbon {{ o.state }}">
+                        <span t-field="o.state"/>
+                    </div>
+                </div>
+
+                <h2>Nonconformity Report - <span t-field="o.name"/></h2>
+                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <table class="table table-sm o_main_table">
+                    <tbody>
+                        <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
+                        <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                        <tr><td><strong>ISO Scope</strong></td><td><span t-field="o.iso_scope"/></td></tr>
+                        <tr><td><strong>Severity</strong></td><td><span t-field="o.severity"/></td></tr>
+                        <tr><td><strong>Priority</strong></td><td><span t-field="o.priority"/></td></tr>
+                        <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
+                        <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
+                        <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
+                        <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                        <tr><td><strong>Detection date</strong></td><td><span t-field="o.date_detected"/></td></tr>
+                        <tr><td><strong>Deadline</strong></td><td><span t-field="o.date_deadline"/></td></tr>
+                    </tbody>
+                </table>
+
+                <h4>Progress by phase</h4>
+                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
+                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Root Cause:</strong> <span t-field="o.root_cause"/></p>
+                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Effectiveness Check:</strong> <span t-field="o.effectiveness_check"/></p>
+                <p><strong>Closing Notes (Internal):</strong> <span t-field="o.closing_notes_internal"/></p>
+            </div>
         </t>
     </template>
 
     <template id="report_sid_nonconformity_document_customer">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-set="doc_lang" t-value="o.customer_id.commercial_partner_id.lang or o.customer_id.lang or o.sale_id.partner_id.lang or env.user.lang"/>
-                <t t-call="web.external_layout" t-lang="doc_lang">
-                    <div class="page">
-                        <h2>Nonconformity Report (Customer) - <span t-field="o.name"/></h2>
-                        <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
-                        <table class="table table-sm o_main_table"><tbody>
-                            <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                            <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                            <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
-                            <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
-                            <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
-                        </tbody></table>
-                        <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                        <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                        <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                        <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                        <p><strong>Closing Notes (Customer):</strong> <span t-field="o.closing_notes_customer"/></p>
-                    </div>
-                </t>
+                <t t-set="doc_lang" t-value="o.customer_id.commercial_partner_id.lang or o.customer_id.lang or o.sale_id.partner_id.lang or env.user.lang or 'en_US'"/>
+                <t t-call="sid_nonconformity.report_sid_nonconformity_document_customer_body" t-lang="doc_lang"/>
             </t>
+        </t>
+    </template>
+
+    <template id="report_sid_nonconformity_document_customer_body">
+        <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Nonconformity Report (Customer) - <span t-field="o.name"/></h2>
+                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <table class="table table-sm o_main_table"><tbody>
+                    <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
+                    <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
+                    <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
+                    <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                </tbody></table>
+                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
+                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Closing Notes (Customer):</strong> <span t-field="o.closing_notes_customer"/></p>
+            </div>
         </t>
     </template>
 
     <template id="report_sid_nonconformity_document_supplier">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-set="doc_lang" t-value="o.supplier_id.commercial_partner_id.lang or o.supplier_id.lang or o.purchase_id.partner_id.lang or env.user.lang"/>
-                <t t-call="web.external_layout" t-lang="doc_lang">
-                    <div class="page">
-                        <h2>Nonconformity Report (Supplier) - <span t-field="o.name"/></h2>
-                        <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
-                        <table class="table table-sm o_main_table"><tbody>
-                            <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                            <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                            <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
-                            <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
-                        </tbody></table>
-                        <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                        <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                        <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                        <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                        <p><strong>Closing Notes (Supplier):</strong> <span t-field="o.closing_notes_supplier"/></p>
-                    </div>
-                </t>
+                <t t-set="doc_lang" t-value="o.supplier_id.commercial_partner_id.lang or o.supplier_id.lang or o.purchase_id.partner_id.lang or env.user.lang or 'en_US'"/>
+                <t t-call="sid_nonconformity.report_sid_nonconformity_document_supplier_body" t-lang="doc_lang"/>
             </t>
+        </t>
+    </template>
+
+    <template id="report_sid_nonconformity_document_supplier_body">
+        <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Nonconformity Report (Supplier) - <span t-field="o.name"/></h2>
+                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <table class="table table-sm o_main_table"><tbody>
+                    <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
+                    <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
+                    <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                </tbody></table>
+                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
+                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Closing Notes (Supplier):</strong> <span t-field="o.closing_notes_supplier"/></p>
+            </div>
         </t>
     </template>
 </odoo>
