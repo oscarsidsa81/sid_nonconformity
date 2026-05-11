@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="action_report_sid_nonconformity_internal" model="ir.actions.report">
-        <field name="name">Nonconformity Phase Report (Internal)</field>
+        <field name="name">Informe de no conformidad (interno)</field>
         <field name="model">sid.nonconformity</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_internal</field>
@@ -12,7 +12,7 @@
     </record>
 
     <record id="action_report_sid_nonconformity_customer" model="ir.actions.report">
-        <field name="name">Nonconformity Phase Report (Customer)</field>
+        <field name="name">Informe de no conformidad (cliente)</field>
         <field name="model">sid.nonconformity</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_customer</field>
@@ -23,7 +23,7 @@
     </record>
 
     <record id="action_report_sid_nonconformity_supplier" model="ir.actions.report">
-        <field name="name">Nonconformity Phase Report (Supplier)</field>
+        <field name="name">Informe de no conformidad (proveedor)</field>
         <field name="model">sid.nonconformity</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sid_nonconformity.report_sid_nonconformity_document_supplier</field>
@@ -35,7 +35,7 @@
 
 
     <record id="server_action_print_sid_nonconformity_internal" model="ir.actions.server">
-        <field name="name">Print Nonconformity Report (Internal)</field>
+        <field name="name">Imprimir informe de no conformidad (interno)</field>
         <field name="model_id" ref="model_sid_nonconformity"/>
         <field name="binding_model_id" ref="model_sid_nonconformity"/>
         <field name="binding_type">action</field>
@@ -45,7 +45,7 @@
     </record>
 
     <record id="server_action_print_sid_nonconformity_customer" model="ir.actions.server">
-        <field name="name">Print Nonconformity Report (Customer)</field>
+        <field name="name">Imprimir informe de no conformidad (cliente)</field>
         <field name="model_id" ref="model_sid_nonconformity"/>
         <field name="binding_model_id" ref="model_sid_nonconformity"/>
         <field name="binding_type">action</field>
@@ -55,7 +55,7 @@
     </record>
 
     <record id="server_action_print_sid_nonconformity_supplier" model="ir.actions.server">
-        <field name="name">Print Nonconformity Report (Supplier)</field>
+        <field name="name">Imprimir informe de no conformidad (proveedor)</field>
         <field name="model_id" ref="model_sid_nonconformity"/>
         <field name="binding_model_id" ref="model_sid_nonconformity"/>
         <field name="binding_type">action</field>
@@ -105,32 +105,32 @@
                     </div>
                 </div>
 
-                <h2>Nonconformity Report - <span t-field="o.name"/></h2>
-                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <h2>Informe de no conformidad - <span t-field="o.name"/></h2>
+                <p><strong>Fase actual:</strong> <span t-field="o.state"/></p>
                 <table class="table table-sm o_main_table">
                     <tbody>
-                        <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                        <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                        <tr><td><strong>ISO Scope</strong></td><td><span t-field="o.iso_scope"/></td></tr>
-                        <tr><td><strong>Severity</strong></td><td><span t-field="o.severity"/></td></tr>
-                        <tr><td><strong>Priority</strong></td><td><span t-field="o.priority"/></td></tr>
-                        <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
-                        <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
-                        <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
-                        <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
-                        <tr><td><strong>Detection date</strong></td><td><span t-field="o.date_detected"/></td></tr>
-                        <tr><td><strong>Deadline</strong></td><td><span t-field="o.date_deadline"/></td></tr>
+                        <tr><td><strong>Título</strong></td><td><span t-field="o.title"/></td></tr>
+                        <tr><td><strong>Tipo</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                        <tr><td><strong>Alcance ISO</strong></td><td><span t-field="o.iso_scope"/></td></tr>
+                        <tr><td><strong>Importancia</strong></td><td><span t-field="o.severity"/></td></tr>
+                        <tr><td><strong>Prioridad</strong></td><td><span t-field="o.priority"/></td></tr>
+                        <tr t-if="o.sale_id"><td><strong>Referencia del pedido de cliente</strong></td><td><span t-field="o.sale_id"/></td></tr>
+                        <tr t-if="o.supplier_id"><td><strong>Proveedor</strong></td><td><span t-field="o.supplier_id"/></td></tr>
+                        <tr t-if="o.customer_id"><td><strong>Cliente</strong></td><td><span t-field="o.customer_id"/></td></tr>
+                        <tr><td><strong>Responsable</strong></td><td><span t-field="o.user_id"/></td></tr>
+                        <tr><td><strong>Fecha de detección</strong></td><td><span t-field="o.date_detected"/></td></tr>
+                        <tr><td><strong>Fecha límite</strong></td><td><span t-field="o.date_deadline"/></td></tr>
                     </tbody>
                 </table>
 
-                <h4>Progress by phase</h4>
-                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                <p><strong>Root Cause:</strong> <span t-field="o.root_cause"/></p>
-                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                <p><strong>Effectiveness Check:</strong> <span t-field="o.effectiveness_check"/></p>
-                <p><strong>Closing Notes (Internal):</strong> <span t-field="o.closing_notes_internal"/></p>
+                <h4>Avance por fase</h4>
+                <p><strong>Descripción / evidencia:</strong> <span t-field="o.description"/></p>
+                <p><strong>Contención inmediata:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Causa raíz:</strong> <span t-field="o.root_cause"/></p>
+                <p><strong>Acción correctiva:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Acción preventiva:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Verificación de eficacia:</strong> <span t-field="o.effectiveness_check"/></p>
+                <p><strong>Notas de cierre internas:</strong> <span t-field="o.closing_notes_internal"/></p>
             </div>
         </t>
     </template>
@@ -148,20 +148,20 @@
         <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
         <t t-call="web.external_layout">
             <div class="page">
-                <h2>Nonconformity Report (Customer) - <span t-field="o.name"/></h2>
-                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <h2>Informe de no conformidad (cliente) - <span t-field="o.name"/></h2>
+                <p><strong>Fase actual:</strong> <span t-field="o.state"/></p>
                 <table class="table table-sm o_main_table"><tbody>
-                    <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                    <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                    <tr t-if="o.sale_id"><td><strong>Customer Order Ref</strong></td><td><span t-field="o.sale_id"/></td></tr>
-                    <tr t-if="o.customer_id"><td><strong>Customer</strong></td><td><span t-field="o.customer_id"/></td></tr>
-                    <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                    <tr><td><strong>Título</strong></td><td><span t-field="o.title"/></td></tr>
+                    <tr><td><strong>Tipo</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr t-if="o.sale_id"><td><strong>Referencia del pedido de cliente</strong></td><td><span t-field="o.sale_id"/></td></tr>
+                    <tr t-if="o.customer_id"><td><strong>Cliente</strong></td><td><span t-field="o.customer_id"/></td></tr>
+                    <tr><td><strong>Responsable</strong></td><td><span t-field="o.user_id"/></td></tr>
                 </tbody></table>
-                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                <p><strong>Closing Notes (Customer):</strong> <span t-field="o.closing_notes_customer"/></p>
+                <p><strong>Descripción / evidencia:</strong> <span t-field="o.description"/></p>
+                <p><strong>Contención inmediata:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Acción correctiva:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Acción preventiva:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Closing Notes (Cliente):</strong> <span t-field="o.closing_notes_customer"/></p>
             </div>
         </t>
     </template>
@@ -179,19 +179,19 @@
         <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
         <t t-call="web.external_layout">
             <div class="page">
-                <h2>Nonconformity Report (Supplier) - <span t-field="o.name"/></h2>
-                <p><strong>Current phase:</strong> <span t-field="o.state"/></p>
+                <h2>Informe de no conformidad (proveedor) - <span t-field="o.name"/></h2>
+                <p><strong>Fase actual:</strong> <span t-field="o.state"/></p>
                 <table class="table table-sm o_main_table"><tbody>
-                    <tr><td><strong>Title</strong></td><td><span t-field="o.title"/></td></tr>
-                    <tr><td><strong>Type</strong></td><td><span t-field="o.nc_type"/></td></tr>
-                    <tr t-if="o.supplier_id"><td><strong>Supplier</strong></td><td><span t-field="o.supplier_id"/></td></tr>
-                    <tr><td><strong>Responsible</strong></td><td><span t-field="o.user_id"/></td></tr>
+                    <tr><td><strong>Título</strong></td><td><span t-field="o.title"/></td></tr>
+                    <tr><td><strong>Tipo</strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr t-if="o.supplier_id"><td><strong>Proveedor</strong></td><td><span t-field="o.supplier_id"/></td></tr>
+                    <tr><td><strong>Responsable</strong></td><td><span t-field="o.user_id"/></td></tr>
                 </tbody></table>
-                <p><strong>Description / Evidence:</strong> <span t-field="o.description"/></p>
-                <p><strong>Immediate Containment:</strong> <span t-field="o.containment_action"/></p>
-                <p><strong>Corrective Action:</strong> <span t-field="o.corrective_action"/></p>
-                <p><strong>Preventive Action:</strong> <span t-field="o.preventive_action"/></p>
-                <p><strong>Closing Notes (Supplier):</strong> <span t-field="o.closing_notes_supplier"/></p>
+                <p><strong>Descripción / evidencia:</strong> <span t-field="o.description"/></p>
+                <p><strong>Contención inmediata:</strong> <span t-field="o.containment_action"/></p>
+                <p><strong>Acción correctiva:</strong> <span t-field="o.corrective_action"/></p>
+                <p><strong>Acción preventiva:</strong> <span t-field="o.preventive_action"/></p>
+                <p><strong>Closing Notes (Proveedor):</strong> <span t-field="o.closing_notes_supplier"/></p>
             </div>
         </t>
     </template>
