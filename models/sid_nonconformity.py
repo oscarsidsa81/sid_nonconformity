@@ -254,8 +254,10 @@ class SidNonconformity(models.Model):
                 report_action = self.env.ref(xmlid, raise_if_not_found=False)
                 if not report_action:
                     continue
-                pdf_content, _report_type = report_action._render_qweb_pdf(rec.id)
                 audience = xmlid.split('_')[-1]
+                lang = rec._get_report_lang_for_audience(audience)
+                report_action_lang = report_action.with_context(lang=lang) if lang else report_action
+                pdf_content, _report_type = report_action_lang._render_qweb_pdf(rec.id)
                 attachment = self.env['ir.attachment'].create({
                     'name': 'NC-%s-%s-%s.pdf' % (rec.name, rec.state, audience),
                     'type': 'binary',
@@ -269,6 +271,16 @@ class SidNonconformity(models.Model):
                 body=message or _('Reporte de fase generado automáticamente.'),
                 attachment_ids=attachments,
             )
+
+    def _get_report_lang_for_audience(self, audience):
+        self.ensure_one()
+        customer_partner = self.customer_id.commercial_partner_id or self.sale_id.partner_id.commercial_partner_id
+        supplier_partner = self.supplier_id.commercial_partner_id or self.purchase_id.partner_id.commercial_partner_id
+        if audience == 'customer':
+            return (customer_partner.lang or self.customer_id.lang or self.sale_id.partner_id.lang or '').strip() or False
+        if audience == 'supplier':
+            return (supplier_partner.lang or self.supplier_id.lang or self.purchase_id.partner_id.lang or '').strip() or False
+        return (self.env.user.lang or '').strip() or False
 
     def action_previous_phase(self):
         previous_state_map = {
