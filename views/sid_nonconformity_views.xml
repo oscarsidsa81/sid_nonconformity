@@ -135,6 +135,9 @@
                     </group>
                     <notebook>
                         <page string="Origen">
+                            <group string="Descripción / Evidencia">
+                                <field name="description" nolabel="1" placeholder="¿Qué ocurrió? ¿Dónde se detectó? ¿Qué evidencia existe?"/>
+                            </group>
                             <group>
                                 <group string="Enlaces operativos">
                                     <field name="supplier_id"/>
@@ -150,17 +153,20 @@
                                     <field name="lot_id" domain="[('product_id', '=', product_id)]"/>
                                     <field name="quantity_affected"/>
                                     <field name="uom_id"/>
-                                    <field name="estimated_cost"/>
-                                    <field name="amount_customer" attrs="{'invisible': [('assume_cost_customer', '=', False)], 'required': [('assume_cost_customer', '=', True)]}"/>
-                                    <field name="amount_sidsa" attrs="{'invisible': [('assume_cost_sidsa', '=', False)], 'required': [('assume_cost_sidsa', '=', True)]}"/>
-                                    <field name="amount_supplier" attrs="{'invisible': [('assume_cost_supplier', '=', False)], 'required': [('assume_cost_supplier', '=', True)]}"/>
-                                    <field name="assume_cost_customer"/>
-                                    <field name="assume_cost_sidsa"/>
-                                    <field name="assume_cost_supplier"/>
                                 </group>
                             </group>
-                            <group string="Descripción / Evidencia">
-                                <field name="description" nolabel="1" placeholder="¿Qué ocurrió? ¿Dónde se detectó? ¿Qué evidencia existe?"/>
+                        </page>
+                        <page string="Costes">
+                            <group>
+                                <group string="Estimación y reparto de coste">
+                                    <field name="estimated_cost"/>
+                                    <field name="assume_cost_customer"/>
+                                    <field name="amount_customer" attrs="{'invisible': [('assume_cost_customer', '=', False)], 'required': [('assume_cost_customer', '=', True)]}"/>
+                                    <field name="assume_cost_sidsa"/>
+                                    <field name="amount_sidsa" attrs="{'invisible': [('assume_cost_sidsa', '=', False)], 'required': [('assume_cost_sidsa', '=', True)]}"/>
+                                    <field name="assume_cost_supplier"/>
+                                    <field name="amount_supplier" attrs="{'invisible': [('assume_cost_supplier', '=', False)], 'required': [('assume_cost_supplier', '=', True)]}"/>
+                                </group>
                             </group>
                         </page>
                         <page string="Tratamiento">
