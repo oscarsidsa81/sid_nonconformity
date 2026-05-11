@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="seq_sid_nonconformity" model="ir.sequence">
-        <field name="name">SID Nonconformity</field>
+        <field name="name">sid_nonconformity</field>
         <field name="code">sid.nonconformity</field>
         <field name="prefix">NC/%(year)s/</field>
         <field name="padding">4</field>

@@ -67,6 +67,38 @@
         <t t-if="is_es"><t t-esc="es"/></t><t t-else=""><t t-esc="en"/></t>
     </template>
 
+
+    <template id="report_sid_nc_state_value">
+        <t t-set="labels_es" t-value="{'draft': 'Borrador', 'open': 'Abierta', 'action': 'Acción Correctiva', 'verify': 'Verificación de Eficacia', 'done': 'Cerrada', 'cancel': 'Cancelada'}"/>
+        <t t-set="labels_en" t-value="{'draft': 'Draft', 'open': 'Open', 'action': 'Corrective Action', 'verify': 'Effectiveness Verification', 'done': 'Closed', 'cancel': 'Cancelled'}"/>
+        <t t-esc="(labels_es if is_es else labels_en).get(o.state, o.state or '')"/>
+    </template>
+
+    <template id="report_sid_nc_type_value">
+        <t t-set="labels_es" t-value="{'supplier': 'Proveedor / Compra', 'customer': 'Reclamación de Cliente', 'warehouse': 'Almacén / Logística', 'product': 'Producto / Especificación', 'process': 'Proceso Interno', 'environment': 'Incidente Ambiental', 'audit': 'Incidencia de Auditoría', 'other': 'Otro'}"/>
+        <t t-set="labels_en" t-value="{'supplier': 'Supplier / Purchase', 'customer': 'Customer Complaint', 'warehouse': 'Warehouse / Logistics', 'product': 'Product / Specification', 'process': 'Internal Process', 'environment': 'Environmental Incident', 'audit': 'Audit Finding', 'other': 'Other'}"/>
+        <t t-esc="(labels_es if is_es else labels_en).get(o.nc_type, o.nc_type or '')"/>
+    </template>
+
+    <template id="report_sid_nc_iso_scope_value">
+        <t t-set="labels_es" t-value="{'iso_9001': 'ISO 9001', 'iso_14001': 'ISO 14001', 'integrated': 'ISO 9001 + ISO 14001 Integrado'}"/>
+        <t t-set="labels_en" t-value="{'iso_9001': 'ISO 9001', 'iso_14001': 'ISO 14001', 'integrated': 'ISO 9001 + ISO 14001 Integrated'}"/>
+        <t t-esc="(labels_es if is_es else labels_en).get(o.iso_scope, o.iso_scope or '')"/>
+    </template>
+
+    <template id="report_sid_nc_severity_value">
+        <t t-set="labels_es" t-value="{'minor': 'Baja', 'med': 'Media', 'major': 'Alta', 'critical': 'Crítica'}"/>
+        <t t-set="labels_en" t-value="{'minor': 'Low', 'med': 'Medium', 'major': 'High', 'critical': 'Critical'}"/>
+        <t t-esc="(labels_es if is_es else labels_en).get(o.severity, o.severity or '')"/>
+    </template>
+
+    <template id="report_sid_nc_priority_value">
+        <t t-set="labels_es" t-value="{'low': 'Baja', 'normal': 'Normal', 'high': 'Alta', 'urgent': 'Urgente'}"/>
+        <t t-set="labels_en" t-value="{'low': 'Low', 'normal': 'Normal', 'high': 'High', 'urgent': 'Urgent'}"/>
+        <t t-esc="(labels_es if is_es else labels_en).get(o.priority, o.priority or '')"/>
+    </template>
+
+
     <template id="report_sid_nonconformity_document_internal">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
@@ -105,19 +137,19 @@
 
                 <div class="nc-ribbon-wrap">
                     <div t-attf-class="nc-state-ribbon {{ o.state }}">
-                        <span t-field="o.state"/>
+                        <t t-call="sid_nonconformity.report_sid_nc_state_value"/>
                     </div>
                 </div>
 
                 <h2><t t-set="es" t-value="'Informe de no conformidad'"/><t t-set="en" t-value="'Nonconformity Report'"/><t t-call="sid_nonconformity.report_sid_nc_label"/> - <span t-field="o.name"/></h2>
-                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <span t-field="o.state"/></p>
+                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <t t-call="sid_nonconformity.report_sid_nc_state_value"/></p>
                 <table class="table table-sm o_main_table">
                     <tbody>
                         <tr><td><strong><t t-set="es" t-value="'Título'"/><t t-set="en" t-value="'Title'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.title"/></td></tr>
-                        <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.nc_type"/></td></tr>
-                        <tr><td><strong><t t-set="es" t-value="'Alcance ISO'"/><t t-set="en" t-value="'ISO Scope'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.iso_scope"/></td></tr>
-                        <tr><td><strong><t t-set="es" t-value="'Importancia'"/><t t-set="en" t-value="'Severity'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.severity"/></td></tr>
-                        <tr><td><strong><t t-set="es" t-value="'Prioridad'"/><t t-set="en" t-value="'Priority'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.priority"/></td></tr>
+                        <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_type_value"/></td></tr>
+                        <tr><td><strong><t t-set="es" t-value="'Alcance ISO'"/><t t-set="en" t-value="'ISO Scope'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_iso_scope_value"/></td></tr>
+                        <tr><td><strong><t t-set="es" t-value="'Importancia'"/><t t-set="en" t-value="'Severity'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_severity_value"/></td></tr>
+                        <tr><td><strong><t t-set="es" t-value="'Prioridad'"/><t t-set="en" t-value="'Priority'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_priority_value"/></td></tr>
                         <tr t-if="o.sale_id"><td><strong><t t-set="es" t-value="'Referencia del pedido de cliente'"/><t t-set="en" t-value="'Sales Order Reference'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.sale_id"/></td></tr>
                         <tr t-if="o.supplier_id"><td><strong><t t-set="es" t-value="'Proveedor'"/><t t-set="en" t-value="'Supplier'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.supplier_id"/></td></tr>
                         <tr t-if="o.customer_id"><td><strong><t t-set="es" t-value="'Cliente'"/><t t-set="en" t-value="'Customer'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.customer_id"/></td></tr>
@@ -154,10 +186,10 @@
         <t t-call="web.external_layout">
             <div class="page">
                 <h2><t t-set="es" t-value="'Informe de no conformidad (cliente)'"/><t t-set="en" t-value="'Nonconformity Report (customer)'"/><t t-call="sid_nonconformity.report_sid_nc_label"/> - <span t-field="o.name"/></h2>
-                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <span t-field="o.state"/></p>
+                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <t t-call="sid_nonconformity.report_sid_nc_state_value"/></p>
                 <table class="table table-sm o_main_table"><tbody>
                     <tr><td><strong><t t-set="es" t-value="'Título'"/><t t-set="en" t-value="'Title'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.title"/></td></tr>
-                    <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_type_value"/></td></tr>
                     <tr t-if="o.sale_id"><td><strong><t t-set="es" t-value="'Referencia del pedido de cliente'"/><t t-set="en" t-value="'Sales Order Reference'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.sale_id"/></td></tr>
                     <tr t-if="o.customer_id"><td><strong><t t-set="es" t-value="'Cliente'"/><t t-set="en" t-value="'Customer'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.customer_id"/></td></tr>
                     <tr><td><strong><t t-set="es" t-value="'Responsable'"/><t t-set="en" t-value="'Responsible'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.user_id"/></td></tr>
@@ -186,10 +218,10 @@
         <t t-call="web.external_layout">
             <div class="page">
                 <h2><t t-set="es" t-value="'Informe de no conformidad (proveedor)'"/><t t-set="en" t-value="'Nonconformity Report (supplier)'"/><t t-call="sid_nonconformity.report_sid_nc_label"/> - <span t-field="o.name"/></h2>
-                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <span t-field="o.state"/></p>
+                <p><strong><t t-set="es" t-value="'Fase actual'"/><t t-set="en" t-value="'Current phase'"/><t t-call="sid_nonconformity.report_sid_nc_label"/>:</strong> <t t-call="sid_nonconformity.report_sid_nc_state_value"/></p>
                 <table class="table table-sm o_main_table"><tbody>
                     <tr><td><strong><t t-set="es" t-value="'Título'"/><t t-set="en" t-value="'Title'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.title"/></td></tr>
-                    <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.nc_type"/></td></tr>
+                    <tr><td><strong><t t-set="es" t-value="'Tipo'"/><t t-set="en" t-value="'Type'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><t t-call="sid_nonconformity.report_sid_nc_type_value"/></td></tr>
                     <tr t-if="o.supplier_id"><td><strong><t t-set="es" t-value="'Proveedor'"/><t t-set="en" t-value="'Supplier'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.supplier_id"/></td></tr>
                     <tr><td><strong><t t-set="es" t-value="'Responsable'"/><t t-set="en" t-value="'Responsible'"/><t t-call="sid_nonconformity.report_sid_nc_label"/></strong></td><td><span t-field="o.user_id"/></td></tr>
                 </tbody></table>
