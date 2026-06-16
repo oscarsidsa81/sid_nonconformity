@@ -109,9 +109,9 @@ class SidNonconformity(models.Model):
     )
     date_deadline = fields.Date(string='Fecha límite', tracking=True)
     date_closed = fields.Date(string='Fecha de cierre', readonly=True, tracking=True)
-    is_overdue = fields.Boolean(string='Vencida', compute='_compute_dates', store=True)
-    days_open = fields.Integer(string='Días abierta', compute='_compute_dates')
-    days_to_close = fields.Integer(string='Días para cerrar', compute='_compute_dates', store=True)
+    is_overdue = fields.Boolean(string='Vencida', compute='_compute_dates', store=True, compute_sudo=False)
+    days_open = fields.Integer(string='Días abierta', compute='_compute_dates', compute_sudo=False)
+    days_to_close = fields.Integer(string='Días para cerrar', compute='_compute_dates', store=True, compute_sudo=False)
 
     supplier_id = fields.Many2one('res.partner', string='Proveedor', tracking=True, domain="[('is_company', '=', True), ('supplier_rank', '>', 0)]")
     customer_id = fields.Many2one('res.partner', string='Cliente', tracking=True, domain="[('is_company', '=', True), ('customer_rank', '>', 0)]")
