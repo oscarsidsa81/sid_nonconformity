@@ -70,7 +70,8 @@
                 <field name="purchase_id" domain="[('partner_id', '=', supplier_id)]"/>
                 <field name="available_sale_order_ids" invisible="1"/>
                 <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
-                <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
+                <field name="available_picking_ids" invisible="1"/>
+                <field name="picking_id" domain="[('id', 'in', available_picking_ids)]"/>
                 <filter name="open" string="Abierta(s)" domain="[('state', 'not in', ('done', 'cancel'))]"/>
                 <filter name="overdue" string="Vencidas" domain="[('is_overdue', '=', True)]"/>
                 <filter name="my_nc" string="Mis NC" domain="[('user_id', '=', uid)]"/>
@@ -145,7 +146,8 @@
                                     <field name="purchase_id" domain="[('partner_id', '=', supplier_id)]"/>
                                     <field name="available_sale_order_ids" invisible="1"/>
                                     <field name="sale_id" domain="[('id', 'in', available_sale_order_ids)]"/>
-                                    <field name="picking_id" domain="['|', ('sale_id', '=', sale_id), ('purchase_id', '=', purchase_id)]"/>
+                                    <field name="available_picking_ids" invisible="1"/>
+                                    <field name="picking_id" domain="[('id', 'in', available_picking_ids)]"/>
                                     <field name="move_line_id" domain="[('picking_id', '=', picking_id)]"/>
                                 </group>
                                 <group string="Producto / Impacto">

@@ -109,7 +109,12 @@ class SidNonconformity(models.Model):
     )
     date_deadline = fields.Date(string='Fecha límite', tracking=True)
     date_closed = fields.Date(string='Fecha de cierre', readonly=True, tracking=True)
-    is_overdue = fields.Boolean(string='Vencida', compute='_compute_dates', store=True, compute_sudo=False)
+    is_overdue = fields.Boolean(
+        string='Vencida',
+        compute='_compute_dates',
+        search='_search_is_overdue',
+        compute_sudo=False,
+    )
     days_open = fields.Integer(string='Días abierta', compute='_compute_dates', compute_sudo=False)
     days_to_close = fields.Integer(string='Días para cerrar', compute='_compute_dates', store=True, compute_sudo=False)
 
@@ -137,6 +142,11 @@ class SidNonconformity(models.Model):
     purchase_id = fields.Many2one('purchase.order', string='Pedido de compra', tracking=True)
     sale_id = fields.Many2one('sale.order', string='Pedido de venta', tracking=True)
     picking_id = fields.Many2one('stock.picking', string='Albarán', tracking=True)
+    available_picking_ids = fields.Many2many(
+        'stock.picking',
+        compute='_compute_available_picking_ids',
+        string='Albaranes disponibles',
+    )
     move_line_id = fields.Many2one('stock.move.line', string='Línea de operación', tracking=True)
 
     description = fields.Html(string='Descripción / Evidencia', tracking=True, sanitize=True)
@@ -201,19 +211,40 @@ class SidNonconformity(models.Model):
             if rec.sale_id and not rec.customer_id:
                 rec.customer_id = rec.sale_id.partner_id
 
-    @api.depends('purchase_id', 'supplier_id')
+    @api.depends('purchase_id', 'supplier_id', 'customer_id')
     def _compute_available_sale_order_ids(self):
+        SaleOrder = self.env['sale.order']
+        PurchaseOrder = self.env['purchase.order']
         for rec in self:
-            sale_orders = self.env['sale.order']
+            sale_orders = SaleOrder
             if rec.purchase_id:
-                sale_orders = rec.purchase_id.order_line.mapped('sale_line_id.order_id')
+                sale_orders |= rec.purchase_id.order_line.mapped('sale_line_id.order_id')
             if rec.supplier_id:
-                supplier_purchases = self.env['purchase.order'].search([
+                supplier_purchases = PurchaseOrder.search([
                     ('partner_id', '=', rec.supplier_id.id)
                 ])
-                supplier_sales = supplier_purchases.order_line.mapped('sale_line_id.order_id')
-                sale_orders |= supplier_sales
+                sale_orders |= supplier_purchases.order_line.mapped('sale_line_id.order_id')
+            if rec.customer_id:
+                sale_orders |= SaleOrder.search([
+                    ('partner_id', 'child_of', rec.customer_id.commercial_partner_id.id),
+                ])
             rec.available_sale_order_ids = sale_orders
+
+    @api.depends('sale_id', 'purchase_id')
+    def _compute_available_picking_ids(self):
+        StockPicking = self.env['stock.picking']
+        for rec in self:
+            domains = []
+            if rec.sale_id:
+                domains.append([('sale_id', '=', rec.sale_id.id)])
+            if rec.purchase_id:
+                domains.append([('purchase_id', '=', rec.purchase_id.id)])
+            if not domains:
+                rec.available_picking_ids = StockPicking
+            elif len(domains) == 1:
+                rec.available_picking_ids = StockPicking.search(domains[0])
+            else:
+                rec.available_picking_ids = StockPicking.search(['|'] + domains[0] + domains[1])
 
     @api.depends('date_detected', 'date_deadline', 'date_closed', 'state')
     def _compute_dates(self):
@@ -224,6 +255,23 @@ class SidNonconformity(models.Model):
             rec.days_open = (end - start).days if start and end and rec.state not in ('done', 'cancel') else 0
             rec.days_to_close = (rec.date_closed - start).days if rec.date_closed and start else 0
             rec.is_overdue = bool(rec.date_deadline and rec.date_deadline < today and rec.state not in ('done', 'cancel'))
+
+    def _search_is_overdue(self, operator, value):
+        if operator not in ('=', '!=') or not isinstance(value, bool):
+            raise UserError(_('Operador no soportado para buscar no conformidades vencidas.'))
+        today = fields.Date.context_today(self)
+        overdue_domain = [
+            ('date_deadline', '<', today),
+            ('state', 'not in', ('done', 'cancel')),
+        ]
+        not_overdue_domain = [
+            '|',
+            ('date_deadline', '=', False),
+            '|',
+            ('date_deadline', '>=', today),
+            ('state', 'in', ('done', 'cancel')),
+        ]
+        return overdue_domain if (operator == '=') == value else not_overdue_domain
 
     def _compute_attachment_count(self):
         attachment_model = self.env['ir.attachment'].sudo()
