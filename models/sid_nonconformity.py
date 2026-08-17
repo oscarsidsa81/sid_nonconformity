@@ -315,28 +315,37 @@ class SidNonconformity(models.Model):
     def action_verify(self):
         self.write({'state': 'verify'})
 
-    def action_close(self):
-        for rec in self:
+    def action_close(self) :
+        for rec in self :
             missing = []
-            if not rec.root_cause:
-                missing.append(_('Análisis de causa raíz'))
-            if not rec.corrective_action:
-                missing.append(_('Acción correctiva'))
-            if rec.state == 'verify' and not rec.effectiveness_check:
-                missing.append(_('Verificación de eficacia'))
-            if not any([rec.assume_cost_customer, rec.assume_cost_sidsa, rec.assume_cost_supplier]):
-                missing.append(_('Al menos una responsabilidad de costo (Cliente, SIDSA, Proveedor)'))
-            if not rec.closing_notes_internal:
-                missing.append(_('Notas de cierre internas'))
-            if (rec.nc_type == 'customer' or rec.customer_id or rec.sale_id) and not rec.closing_notes_customer:
-                missing.append(_('Notas de cierre para cliente'))
-            if (rec.nc_type == 'supplier' or rec.supplier_id or rec.purchase_id) and not rec.closing_notes_supplier:
-                missing.append(_('Notas de cierre para proveedor'))
-            if missing:
-                raise UserError(_('No puede cerrar la no conformidad hasta completar estos campos: %s') % ', '.join(missing))
-            rec.write({'state': 'done', 'date_closed': fields.Date.context_today(rec)})
-            rec._post_phase_report_to_chatter(
-                message=_('Formulario PDF generado automáticamente al cerrar la no conformidad.')
+            if not rec.root_cause :
+                missing.append ( _ ( 'Análisis de causa raíz' ) )
+            if not rec.corrective_action :
+                missing.append ( _ ( 'Acción correctiva' ) )
+            if rec.state == 'verify' and not rec.effectiveness_check :
+                missing.append ( _ ( 'Verificación de eficacia' ) )
+            if rec.estimated_cost > 0 and not any (
+                    [rec.assume_cost_customer, rec.assume_cost_sidsa,
+                     rec.assume_cost_supplier] ) :
+                missing.append (
+                    _ ( 'Al menos una responsabilidad de costo (Cliente, SIDSA, Proveedor)' ) )
+            if not rec.closing_notes_internal :
+                missing.append ( _ ( 'Notas de cierre internas' ) )
+            if (
+                    rec.nc_type == 'customer' or rec.customer_id or rec.sale_id) and not rec.closing_notes_customer :
+                missing.append ( _ ( 'Notas de cierre para cliente' ) )
+            if (
+                    rec.nc_type == 'supplier' or rec.supplier_id or rec.purchase_id) and not rec.closing_notes_supplier :
+                missing.append ( _ ( 'Notas de cierre para proveedor' ) )
+            if missing :
+                raise UserError (
+                    _ ( 'No puede cerrar la no conformidad hasta completar estos campos: %s' ) % ', '.join (
+                        missing ) )
+            rec.write ( {'state' : 'done',
+                         'date_closed' : fields.Date.context_today ( rec )} )
+            rec._post_phase_report_to_chatter (
+                message=_ (
+                    'Formulario PDF generado automáticamente al cerrar la no conformidad.' )
             )
 
     def action_cancel(self):
